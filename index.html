@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#090b12">
-<meta name="description" content="Nexora Studio — your AI development workspace.">
+<meta name="description" content="Nexora Studio — a mobile-first workspace for AI models and training workflows.">
 <title>Nexora Studio</title>
 
 <style>
@@ -19,24 +19,31 @@
   --cyan: #67e8f9;
   --green: #63e6a5;
   --red: #ff7d91;
+  --radius: 18px;
 }
 
 * {
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  background:
-    radial-gradient(ellipse at 75% -10%, #222044, transparent 42%),
-    var(--bg);
-  color: var(--text);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 14px;
+html {
+  scroll-behavior: smooth;
 }
 
-button, input, textarea {
+body {
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 75% -10%, #222044 0, transparent 42%),
+    var(--bg);
+  color: var(--text);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
   font: inherit;
 }
 
@@ -46,23 +53,24 @@ button {
 
 button:focus-visible,
 input:focus-visible,
-textarea:focus-visible {
+textarea:focus-visible,
+select:focus-visible {
   outline: 2px solid var(--cyan);
   outline-offset: 3px;
 }
 
 .shell {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: auto;
-  padding: 22px clamp(14px, 3vw, 32px) 40px;
+  padding: 22px clamp(14px, 3vw, 32px) 42px;
 }
 
 .topbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 30px;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 26px;
 }
 
 .brand {
@@ -72,36 +80,39 @@ textarea:focus-visible {
 }
 
 .logo {
-  width: 44px;
-  height: 44px;
+  width: 43px;
+  height: 43px;
+  border-radius: 14px;
   display: grid;
   place-items: center;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #b29aff, #6043bf);
-  font-size: 23px;
+  background: linear-gradient(140deg, #b29aff, #6c4dcb 65%, #3d8dbd);
+  box-shadow: 0 8px 30px #8061ff35;
   font-weight: 900;
+  font-size: 21px;
 }
 
 .brand h1 {
   font-size: 19px;
+  letter-spacing: -.5px;
   margin: 0;
 }
 
 .brand p {
   font-size: 12px;
   color: var(--muted);
-  margin: 2px 0 0;
+  margin: 1px 0 0;
 }
 
 .status {
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 8px 11px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 11px;
+  white-space: nowrap;
 }
 
 .dot {
@@ -109,57 +120,69 @@ textarea:focus-visible {
   height: 7px;
   border-radius: 50%;
   background: var(--green);
+  box-shadow: 0 0 12px #63e6a566;
 }
 
 .hero {
-  margin-bottom: 25px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 0 0 22px;
 }
 
 .eyebrow {
   color: var(--cyan);
-  font-size: 10px;
-  letter-spacing: 2px;
-  font-weight: 800;
   text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 10px;
+  font-weight: 800;
 }
 
 .hero h2 {
-  font-size: clamp(30px, 5vw, 44px);
-  letter-spacing: -1.5px;
-  line-height: 1.1;
-  margin: 10px 0;
+  font-size: clamp(28px, 5vw, 43px);
+  letter-spacing: -1.8px;
+  line-height: 1.08;
+  margin: 8px 0 10px;
 }
 
 .hero p {
-  max-width: 600px;
+  max-width: 590px;
   color: var(--muted);
-  line-height: 1.7;
+  margin: 0;
+  font-size: 14px;
 }
 
-.button-row {
+.hero-actions {
   display: flex;
   gap: 9px;
   flex-wrap: wrap;
-  margin-top: 15px;
 }
 
 .btn {
   border: 1px solid var(--line);
-  border-radius: 11px;
+  border-radius: 12px;
   padding: 10px 14px;
   background: #171d2b;
   color: var(--text);
   font-weight: 650;
+  font-size: 13px;
+  transition: transform .15s, border-color .15s;
 }
 
 .btn:hover {
-  border-color: var(--accent);
+  transform: translateY(-1px);
+  border-color: #62528f;
 }
 
 .btn.primary {
   background: linear-gradient(120deg, #a58aff, #7759d9);
   border-color: transparent;
-  color: white;
+  color: #fff;
+}
+
+.btn.ghost {
+  background: transparent;
 }
 
 .grid {
@@ -170,52 +193,54 @@ textarea:focus-visible {
 }
 
 .panel {
-  min-width: 0;
-  padding: 20px;
+  background: linear-gradient(155deg, #141927ee, #10141eee);
   border: 1px solid var(--line);
-  border-radius: 18px;
-  background: linear-gradient(150deg, #141927, #10141e);
-  margin-bottom: 16px;
+  border-radius: var(--radius);
+  padding: 20px;
+  min-width: 0;
+  box-shadow: 0 12px 40px #00000012;
 }
 
 .panel-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 16px;
 }
 
-.panel h3 {
+.panel-head h3 {
   font-size: 15px;
   margin: 0;
 }
 
 .sub {
-  color: var(--muted);
   font-size: 12px;
-  margin-top: 5px;
+  color: var(--muted);
+  margin: 4px 0 0;
 }
 
 .tag {
-  font-size: 10px;
-  font-weight: 800;
-  color: #c7baff;
-  border: 1px solid #40345e;
-  background: #201c30;
-  padding: 5px 8px;
+  border: 1px solid #344056;
+  background: #1a2333;
+  color: #b6c4e0;
   border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 750;
+  white-space: nowrap;
 }
 
-.dropzone {
+.model-drop {
   border: 1px dashed #485473;
-  background: #121725;
+  background: linear-gradient(135deg, #171d2d, #121725);
   border-radius: 15px;
-  padding: 23px 15px;
+  padding: 22px 16px;
   text-align: center;
+  transition: border-color .2s;
 }
 
-.dropzone.drag {
+.model-drop.drag {
   border-color: var(--cyan);
   background: #182334;
 }
@@ -224,47 +249,49 @@ textarea:focus-visible {
   width: 45px;
   height: 45px;
   margin: 0 auto 10px;
+  border-radius: 14px;
   display: grid;
   place-items: center;
   background: #282345;
-  border-radius: 14px;
+  color: #c9baff;
   font-size: 22px;
 }
 
-.dropzone h4 {
-  margin: 0 0 6px;
+.model-drop h4 {
+  margin: 0 0 4px;
+  font-size: 15px;
 }
 
-.dropzone p {
+.model-drop p {
+  margin: 0 auto 14px;
+  max-width: 360px;
   color: var(--muted);
   font-size: 12px;
-  line-height: 1.6;
 }
 
 .filename {
-  margin-top: 12px;
+  font-size: 12px;
   color: var(--cyan);
   overflow-wrap: anywhere;
-  font-size: 12px;
+  margin-top: 12px;
 }
 
 .hidden {
   display: none !important;
 }
 
-.metrics {
+.model-info {
+  margin-top: 14px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 14px;
+  gap: 9px;
 }
 
 .metric {
-  min-width: 0;
-  padding: 12px;
-  background: #0d111b;
   border: 1px solid var(--line);
+  background: #0d111b;
   border-radius: 12px;
+  padding: 12px;
 }
 
 .metric span {
@@ -275,20 +302,21 @@ textarea:focus-visible {
 
 .metric strong {
   display: block;
-  margin-top: 5px;
-  font-size: 14px;
+  font-size: 16px;
+  margin-top: 4px;
   overflow-wrap: anywhere;
 }
 
 .storage {
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
 .label-row {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 10px;
+  align-items: center;
+  margin-bottom: 9px;
 }
 
 .label-row label {
@@ -297,13 +325,15 @@ textarea:focus-visible {
 }
 
 .label-row output {
+  font-size: 12px;
   color: var(--cyan);
-  font-weight: 700;
+  font-weight: 750;
 }
 
-input[type="range"] {
+.range {
   width: 100%;
   accent-color: var(--accent);
+  cursor: pointer;
 }
 
 .range-labels {
@@ -311,23 +341,29 @@ input[type="range"] {
   justify-content: space-between;
   color: var(--muted);
   font-size: 10px;
+  margin-top: 3px;
 }
 
 .hint {
-  color: var(--muted);
   font-size: 11px;
-  line-height: 1.6;
+  color: var(--muted);
+  margin: 9px 0 0;
 }
 
 .notice {
-  margin-top: 16px;
-  padding: 12px;
+  display: flex;
+  gap: 9px;
+  padding: 11px 12px;
+  background: #201c30;
   border: 1px solid #40345e;
   border-radius: 11px;
-  background: #201c30;
   color: #c9c0e8;
   font-size: 11px;
-  line-height: 1.6;
+  margin-top: 15px;
+}
+
+.notice b {
+  color: #e9e2ff;
 }
 
 .tools {
@@ -336,38 +372,55 @@ input[type="range"] {
 }
 
 .tool {
+  width: 100%;
+  text-align: left;
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  width: 100%;
   padding: 14px;
-  text-align: left;
-  color: var(--text);
-  background: #111622;
   border: 1px solid var(--line);
   border-radius: 14px;
+  background: #111622;
+  color: var(--text);
+  transition: transform .15s, border-color .15s;
 }
 
 .tool:hover,
 .tool[aria-pressed="true"] {
-  border-color: var(--accent);
+  border-color: #8c72db;
+  transform: translateY(-1px);
   background: #171a2a;
 }
 
 .tool-icon {
   flex: 0 0 38px;
   height: 38px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
-  border-radius: 12px;
+  font-size: 17px;
   background: #28223f;
   color: #c9baff;
-  font-size: 18px;
+}
+
+.tool:nth-child(2) .tool-icon {
+  background: #1d3030;
+  color: #8be9c3;
+}
+
+.tool:nth-child(3) .tool-icon {
+  background: #202b40;
+  color: #9fc5ff;
+}
+
+.tool:nth-child(4) .tool-icon {
+  background: #342431;
+  color: #ffb5ca;
 }
 
 .tool-copy {
-  flex: 1;
   min-width: 0;
+  flex: 1;
 }
 
 .tool-copy strong {
@@ -379,19 +432,29 @@ input[type="range"] {
   display: block;
   color: var(--muted);
   font-size: 11px;
-  line-height: 1.6;
+  line-height: 1.45;
   margin-top: 4px;
 }
 
 .arrow {
   color: #77839d;
-  font-size: 20px;
+  font-size: 18px;
+}
+
+.section {
+  margin-top: 16px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
 
 .field {
   display: grid;
-  gap: 7px;
-  margin-bottom: 14px;
+  gap: 6px;
+  margin-bottom: 13px;
 }
 
 .field label {
@@ -400,78 +463,76 @@ input[type="range"] {
 }
 
 .field input,
-.field textarea {
+.field textarea,
+.field select {
   width: 100%;
-  min-width: 0;
-  padding: 11px;
-  color: var(--text);
   background: #0b0f18;
   border: 1px solid #2a3348;
+  color: var(--text);
   border-radius: 10px;
+  padding: 10px 11px;
+  min-width: 0;
 }
 
 .field textarea {
-  min-height: 100px;
   resize: vertical;
+  min-height: 88px;
+}
+
+.button-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .output {
-  min-height: 90px;
-  padding: 13px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: #0a0e16;
+  min-height: 92px;
+  padding: 12px;
   color: #b9c5dc;
   font-size: 12px;
-  line-height: 1.7;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
-.output:empty::before {
-  content: "Your results will appear here.";
+.output:empty:before {
+  content: "Results and status messages will appear here.";
   color: #64718a;
 }
 
-.divider {
-  height: 1px;
-  background: var(--line);
-  margin: 18px 0;
-}
-
-.checklist {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 12px;
-}
-
-.checklist li {
+.footer {
   display: flex;
-  gap: 9px;
-  font-size: 12px;
-  color: #c0c9dc;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 23px;
+  color: #66718a;
+  font-size: 11px;
 }
 
-.check {
-  color: var(--green);
+.footer a {
+  color: #a99aff;
+  text-decoration: none;
 }
 
 .toast {
   position: fixed;
-  left: 50%;
   bottom: 18px;
-  transform: translate(-50%, 15px);
+  left: 50%;
+  transform: translate(-50%, 18px);
   opacity: 0;
   pointer-events: none;
-  padding: 12px 16px;
   background: #20283a;
   border: 1px solid #3a4660;
   border-radius: 12px;
-  transition: .2s;
-  z-index: 10;
+  padding: 11px 15px;
+  max-width: calc(100vw - 28px);
   font-size: 12px;
+  box-shadow: 0 12px 35px #0008;
+  transition: opacity .2s, transform .2s;
+  z-index: 20;
 }
 
 .toast.show {
@@ -479,19 +540,29 @@ input[type="range"] {
   transform: translate(-50%, 0);
 }
 
-.footer {
-  margin-top: 20px;
-  color: #66718a;
-  font-size: 11px;
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
+.divider {
+  height: 1px;
+  background: var(--line);
+  margin: 16px 0;
 }
 
-@media (max-width: 800px) {
-  .grid {
+@media (max-width: 820px) {
+  .grid,
+  .workspace {
     grid-template-columns: 1fr;
+  }
+
+  .hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .hero-actions {
+    width: 100%;
+  }
+
+  .panel {
+    padding: 16px;
   }
 }
 
@@ -500,11 +571,11 @@ input[type="range"] {
     padding: 14px 12px 30px;
   }
 
-  .panel {
-    padding: 15px;
+  .status .status-text {
+    display: none;
   }
 
-  .metrics {
+  .model-info {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -512,8 +583,20 @@ input[type="range"] {
     grid-column: 1 / -1;
   }
 
-  .status .status-text {
-    display: none;
+  .brand h1 {
+    font-size: 17px;
+  }
+
+  .hero h2 {
+    font-size: 31px;
+  }
+
+  .hero-actions .btn {
+    flex: 1;
+  }
+
+  .panel {
+    border-radius: 15px;
   }
 }
 </style>
@@ -522,269 +605,302 @@ input[type="range"] {
 <body>
 <div class="shell">
 
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">N</div>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">N</div>
+      <div>
+        <h1>Nexora Studio</h1>
+        <p>Local AI workshop</p>
+      </div>
+    </div>
+
+    <div class="status">
+      <span class="dot"></span>
+      <span class="status-text">Workspace ready</span>
+      <span>v0.1</span>
+    </div>
+  </header>
+
+  <section class="hero">
     <div>
-      <h1>Nexora Studio</h1>
-      <p>Local AI workshop</p>
-    </div>
-  </div>
-
-  <div class="status">
-    <span class="dot"></span>
-    <span class="status-text">Workspace ready</span>
-    <span>v0.1</span>
-  </div>
-</header>
-
-<section class="hero">
-  <div class="eyebrow">Your models. Your workflow.</div>
-  <h2>Build your next AI.</h2>
-  <p>
-    Inspect GGUF files, prepare fine-tuning workflows,
-    diagnose model problems, and configure the Android build.
-  </p>
-
-  <div class="button-row">
-    <button class="btn primary" id="importButton" type="button">
-      + Import GGUF
-    </button>
-    <button class="btn" id="resetButton" type="button">
-      Reset workspace
-    </button>
-  </div>
-</section>
-
-<main>
-<div class="grid">
-
-<section class="panel">
-  <div class="panel-head">
-    <div>
-      <h3>Model workspace</h3>
-      <p class="sub">Inspect a local model file.</p>
-    </div>
-    <span class="tag">GGUF</span>
-  </div>
-
-  <div class="dropzone" id="dropzone">
-    <div class="upload-icon">↥</div>
-    <h4>Bring your model</h4>
-    <p>
-      Select or drag a .gguf file here.
-      The browser reads file metadata only.
-    </p>
-
-    <button class="btn primary" id="chooseButton" type="button">
-      Choose GGUF file
-    </button>
-
-    <input
-      id="fileInput"
-      class="hidden"
-      type="file"
-      accept=".gguf,application/octet-stream"
-    >
-
-    <div class="filename" id="fileName">No model selected</div>
-  </div>
-
-  <div class="metrics">
-    <div class="metric">
-      <span>File size</span>
-      <strong id="fileSize">—</strong>
-    </div>
-    <div class="metric">
-      <span>Size budget</span>
-      <strong id="budgetMetric">4 GB</strong>
-    </div>
-    <div class="metric">
-      <span>Budget status</span>
-      <strong id="budgetStatus">No model</strong>
-    </div>
-  </div>
-
-  <div class="storage">
-    <div class="label-row">
-      <label for="budgetRange">Model size budget</label>
-      <output id="budgetOutput">4 GB</output>
-    </div>
-
-    <input
-      id="budgetRange"
-      type="range"
-      min="256"
-      max="16384"
-      step="256"
-      value="4096"
-    >
-
-    <div class="range-labels">
-      <span>256 MB</span>
-      <span>8 GB</span>
-      <span>16 GB</span>
-    </div>
-
-    <p class="hint">
-      This budget checks file size. It does not resize or quantize a model.
-    </p>
-  </div>
-
-  <div class="notice">
-    Local-first prototype: model inference, binary GGUF editing, and
-    fine-tuning require compatible native engines or a training backend.
-  </div>
-</section>
-
-<section class="panel">
-  <div class="panel-head">
-    <div>
-      <h3>AI toolbench</h3>
-      <p class="sub">Choose a workflow.</p>
-    </div>
-    <span class="tag">4 TOOLS</span>
-  </div>
-
-  <div class="tools">
-    <button class="tool" data-tool="editor" aria-pressed="false" type="button">
-      <span class="tool-icon">⌘</span>
-      <span class="tool-copy">
-        <strong>GGUF Editor</strong>
-        <small>Prepare model inspection and editing checks.</small>
-      </span>
-      <span class="arrow">›</span>
-    </button>
-
-    <button class="tool" data-tool="fixer" aria-pressed="false" type="button">
-      <span class="tool-icon">✳</span>
-      <span class="tool-copy">
-        <strong>Automatic Problem Fixer</strong>
-        <small>Generate a diagnostic plan for model issues.</small>
-      </span>
-      <span class="arrow">›</span>
-    </button>
-
-    <button class="tool" data-tool="manual" aria-pressed="false" type="button">
-      <span class="tool-icon">⚙</span>
-      <span class="tool-copy">
-        <strong>Manual Fine-Tuning</strong>
-        <small>Prepare dataset and training parameters.</small>
-      </span>
-      <span class="arrow">›</span>
-    </button>
-
-    <button class="tool" data-tool="auto" aria-pressed="false" type="button">
-      <span class="tool-icon">✧</span>
-      <span class="tool-copy">
-        <strong>Auto Fine-Tune</strong>
-        <small>Plan a research-to-training workflow.</small>
-      </span>
-      <span class="arrow">›</span>
-    </button>
-  </div>
-</section>
-
-<section class="panel">
-  <div class="panel-head">
-    <div>
-      <h3 id="workflowTitle">Workflow configuration</h3>
-      <p class="sub" id="workflowDescription">
-        Select a tool above to get started.
+      <div class="eyebrow">Your models. Your workflow.</div>
+      <h2>Build your next AI.</h2>
+      <p>
+        Inspect GGUF files, plan model improvements, and prepare
+        fine-tuning workflows from one mobile-first workspace.
       </p>
     </div>
-    <span class="tag" id="workflowTag">READY</span>
-  </div>
 
-  <div class="field">
-    <label for="projectName">Project name</label>
-    <input id="projectName" maxlength="80" placeholder="My AI Assistant">
-  </div>
+    <div class="hero-actions">
+      <button class="btn ghost" id="resetBtn" type="button">
+        Reset workspace
+      </button>
 
-  <div class="field">
-    <label for="projectNotes">Requirements or problem description</label>
-    <textarea
-      id="projectNotes"
-      maxlength="3000"
-      placeholder="Describe your AI, its goal, or the problem you want to fix..."
-    ></textarea>
-  </div>
-
-  <div class="button-row">
-    <button class="btn primary" id="generateButton" type="button">
-      Generate workflow plan
-    </button>
-    <button class="btn" id="saveButton" type="button">
-      Save brief locally
-    </button>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="panel-head">
-    <div>
-      <h3>Plan output</h3>
-      <p class="sub">Generated locally in this browser.</p>
+      <button class="btn primary" id="importTop" type="button">
+        ＋ Import GGUF
+      </button>
     </div>
-    <button class="btn" id="copyButton" type="button">Copy</button>
-  </div>
+  </section>
 
-  <div class="output" id="planOutput" aria-live="polite"></div>
-</section>
+  <main>
+    <div class="grid">
 
-<section class="panel">
-  <div class="panel-head">
-    <div>
-      <h3>Android build pipeline</h3>
-      <p class="sub">Java 17 and a compatible Gradle build.</p>
+      <!-- GGUF model workspace -->
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h3>Model workspace</h3>
+            <p class="sub">Import a model to inspect its file details.</p>
+          </div>
+          <span class="tag">GGUF</span>
+        </div>
+
+        <div class="model-drop" id="dropZone">
+          <div class="upload-icon" aria-hidden="true">↥</div>
+
+          <h4>Bring your model</h4>
+
+          <p>
+            Choose a local <code>.gguf</code> file or drop it here.
+            Only file metadata is read; your model is not uploaded.
+          </p>
+
+          <button class="btn primary" id="chooseBtn" type="button">
+            Choose GGUF file
+          </button>
+
+          <input
+            id="fileInput"
+            class="hidden"
+            type="file"
+            accept=".gguf,application/octet-stream"
+          >
+
+          <div class="filename" id="fileName">No model selected</div>
+        </div>
+
+        <div class="model-info">
+          <div class="metric">
+            <span>File size</span>
+            <strong id="fileSize">—</strong>
+          </div>
+
+          <div class="metric">
+            <span>Size budget</span>
+            <strong id="budgetMetric">4 GB</strong>
+          </div>
+
+          <div class="metric">
+            <span>Budget status</span>
+            <strong id="budgetStatus">No model</strong>
+          </div>
+        </div>
+
+        <div class="storage">
+          <div class="label-row">
+            <label for="budgetRange">Model size budget</label>
+            <output id="budgetOutput" for="budgetRange">4 GB</output>
+          </div>
+
+          <input
+            class="range"
+            id="budgetRange"
+            type="range"
+            min="256"
+            max="16384"
+            step="256"
+            value="4096"
+          >
+
+          <div class="range-labels">
+            <span>256 MB</span>
+            <span>8 GB</span>
+            <span>16 GB</span>
+          </div>
+
+          <p class="hint">
+            The budget estimates fit; it does not resize or quantize a model.
+          </p>
+        </div>
+
+        <div class="notice">
+          <span>ⓘ</span>
+          <div>
+            <b>Local-first prototype.</b>
+            Actual inference, GGUF rewriting, and training need compatible
+            native engines and/or a training backend.
+          </div>
+        </div>
+      </section>
+
+      <!-- AI tools -->
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h3>AI toolbench</h3>
+            <p class="sub">Choose a workflow to configure.</p>
+          </div>
+
+          <span class="tag">4 TOOLS</span>
+        </div>
+
+        <div class="tools">
+
+          <button
+            class="tool"
+            data-tool="editor"
+            aria-pressed="false"
+            type="button"
+          >
+            <span class="tool-icon">⌘</span>
+
+            <span class="tool-copy">
+              <strong>GGUF Editor</strong>
+              <small>
+                Inspect model metadata and prepare an editing checklist.
+              </small>
+            </span>
+
+            <span class="arrow">›</span>
+          </button>
+
+          <button
+            class="tool"
+            data-tool="fixer"
+            aria-pressed="false"
+            type="button"
+          >
+            <span class="tool-icon">✳</span>
+
+            <span class="tool-copy">
+              <strong>Automatic Problem Fixer</strong>
+              <small>
+                Record symptoms and generate a diagnostic plan.
+              </small>
+            </span>
+
+            <span class="arrow">›</span>
+          </button>
+
+          <button
+            class="tool"
+            data-tool="manual"
+            aria-pressed="false"
+            type="button"
+          >
+            <span class="tool-icon">⚙</span>
+
+            <span class="tool-copy">
+              <strong>Manual Fine-Tuning</strong>
+              <small>
+                Configure a dataset brief and LoRA training parameters.
+              </small>
+            </span>
+
+            <span class="arrow">›</span>
+          </button>
+
+          <button
+            class="tool"
+            data-tool="auto"
+            aria-pressed="false"
+            type="button"
+          >
+            <span class="tool-icon">✧</span>
+
+            <span class="tool-copy">
+              <strong>Auto Fine-Tune</strong>
+              <small>
+                Describe the AI you want and plan a sourced data pipeline.
+              </small>
+            </span>
+
+            <span class="arrow">›</span>
+          </button>
+
+        </div>
+      </section>
+
     </div>
-    <span class="tag">ANDROID</span>
-  </div>
 
-  <ul class="checklist">
-    <li><span class="check">✓</span> Single-file HTML interface</li>
-    <li><span class="check">✓</span> Responsive mobile layout</li>
-    <li><span>○</span> Android WebView wrapper</li>
-    <li><span>○</span> Gradle project and wrapper</li>
-    <li><span>○</span> GitHub Actions APK artifact</li>
-    <li><span>○</span> Native GGUF inference engine</li>
-  </ul>
+    <!-- AI workflow configuration -->
+    <div class="workspace section">
+      <section class="panel">
 
-  <div class="divider"></div>
+        <div class="panel-head">
+          <div>
+            <h3 id="workspaceTitle">Workflow configuration</h3>
+            <p class="sub" id="workspaceSubtitle">
+              Select a tool above to get started.
+            </p>
+          </div>
 
-  <div class="field">
-    <label for="repoUrl">GitHub repository URL</label>
-    <input
-      id="repoUrl"
-      type="url"
-      placeholder="https://github.com/you/nexora-studio"
-    >
-  </div>
+          <span class="tag" id="workflowTag">READY</span>
+        </div>
 
-  <div class="field">
-    <label for="appId">Android application ID</label>
-    <input id="appId" value="com.nexora.studio">
-  </div>
+        <div class="field">
+          <label for="projectName">Project name</label>
 
-  <button class="btn primary" id="buildButton" type="button">
-    Prepare build checklist
-  </button>
+          <input
+            id="projectName"
+            maxlength="80"
+            placeholder="e.g. My Assistant"
+          >
+        </div>
 
-  <div class="output hidden" id="buildOutput" style="margin-top:12px"></div>
+        <div class="field">
+          <label for="projectNotes">
+            Requirements / symptoms / training goal
+          </label>
 
-  <p class="hint">
-    The HTML interface cannot build an APK by itself. The Android wrapper
-    and GitHub Actions workflow must be added separately.
-  </p>
-</section>
+          <textarea
+            id="projectNotes"
+            maxlength="3000"
+            placeholder="Describe the model, goal, error, or training task..."
+          ></textarea>
+        </div>
 
-</div>
-</main>
+        <div class="button-row">
+          <button class="btn primary" id="generateBtn" type="button">
+            Generate workflow plan
+          </button>
 
-<footer class="footer">
-  <span>Nexora Studio · Prototype v0.1</span>
-  <span>Local interface · No model uploads</span>
-</footer>
+          <button class="btn" id="saveBtn" type="button">
+            Save brief locally
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="panel-head">
+          <div>
+            <h3>Plan output</h3>
+            <p class="sub">
+              A local planning aid — not a running training job.
+            </p>
+          </div>
+
+          <button class="btn" id="copyBtn" type="button">Copy</button>
+        </div>
+
+        <div class="output" id="planOutput" aria-live="polite"></div>
+
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <span>Nexora Studio · Prototype v0.1</span>
+
+    <span>
+      Local UI prototype · No model uploads ·
+      <a
+        href="https://github.com/serajdevlops-ux/Nexora-studio"
+        target="_blank"
+        rel="noopener noreferrer"
+      >GitHub</a>
+    </span>
+  </footer>
 
 </div>
 
@@ -796,6 +912,9 @@ input[type="range"] {
 (() => {
   const $ = (selector) => document.querySelector(selector);
 
+  const fileInput = $("#fileInput");
+  const dropZone = $("#dropZone");
+
   const state = {
     file: null,
     tool: null,
@@ -806,98 +925,125 @@ input[type="range"] {
     editor: {
       title: "GGUF Editor",
       tag: "INSPECT",
-      description: "Prepare a model inspection checklist.",
-      placeholder: "Which model metadata or behavior do you want to inspect?",
+
+      description:
+        "Inspect what can be checked safely in this prototype.",
+
+      placeholder:
+        "Which metadata or model behavior do you want to inspect?",
+
       plan:
-        "1. Inspect the GGUF header and metadata with a compatible parser.\n" +
-        "2. Verify architecture, tensor types, context length, tokenizer, and quantization.\n" +
-        "3. Back up the original before modifying supported metadata.\n" +
-        "4. Validate any output with the target inference runtime.\n\n" +
-        "Binary GGUF editing is not implemented in this frontend."
+        "1. Inspect the GGUF header and metadata with a compatible GGUF parser.\n" +
+        "2. Verify architecture, tensor types, context length, tokenizer data, and quantization.\n" +
+        "3. Back up the original before editing supported metadata.\n" +
+        "4. Validate the output with the target inference runtime.\n\n" +
+        "This browser prototype does not parse or rewrite GGUF binary contents."
     },
 
     fixer: {
       title: "Automatic Problem Fixer",
       tag: "DIAGNOSE",
-      description: "Build a diagnostic plan for a model problem.",
-      placeholder: "Describe the error, runtime, device, and steps already tried.",
+
+      description:
+        "Describe the symptom and review a diagnostic plan.",
+
+      placeholder:
+        "Include the full error, runtime, device, and steps already tried.",
+
       plan:
         "1. Reproduce the issue and capture the complete log.\n" +
-        "2. Verify file integrity and runtime compatibility.\n" +
-        "3. Check RAM/VRAM, context length, model architecture, and quantization.\n" +
-        "4. Change one reversible setting at a time.\n" +
-        "5. Preserve the original model and record all changes.\n\n" +
-        "No repair was applied. An actual automatic fixer needs a diagnostic backend."
+        "2. Verify file integrity and runtime support for the architecture and quantization.\n" +
+        "3. Check available RAM/VRAM, context length, runtime version, and model settings.\n" +
+        "4. Change one reversible setting at a time and compare results.\n" +
+        "5. Preserve the original model and record changes.\n\n" +
+        "No repair was performed. Connect a model-aware diagnostic backend before applying fixes."
     },
 
     manual: {
       title: "Manual Fine-Tuning",
       tag: "MANUAL",
-      description: "Prepare a fine-tuning brief.",
-      placeholder: "Describe the training goal, dataset, model, and hardware.",
+
+      description:
+        "Prepare a training brief for a compatible environment.",
+
+      placeholder:
+        "Describe training goals, dataset format, target behavior, and hardware.",
+
       plan:
-        "1. Identify the model family and obtain compatible original weights.\n" +
-        "2. Prepare a clean, appropriately licensed dataset.\n" +
-        "3. Create training and validation splits.\n" +
-        "4. Select a compatible method such as LoRA or QLoRA.\n" +
-        "5. Configure learning rate, epochs, batch size, and sequence length.\n" +
-        "6. Evaluate the result and export using compatible conversion tools.\n\n" +
-        "GGUF is primarily an inference format; a GGUF file alone is generally not the standard fine-tuning input. No training job was launched."
+        "1. Confirm the model family and obtain compatible original/Hugging Face weights; GGUF alone is generally not the standard fine-tuning input.\n" +
+        "2. Prepare a licensed, clean dataset and split training/validation data.\n" +
+        "3. Choose a compatible method such as LoRA/QLoRA.\n" +
+        "4. Set sequence length, learning rate, epochs, batch size, and checkpoint cadence for your hardware.\n" +
+        "5. Evaluate against held-out examples, save checkpoints, and export/convert through a compatible pipeline.\n\n" +
+        "No training job was launched."
     },
 
     auto: {
       title: "Auto Fine-Tune",
       tag: "AUTO PLAN",
-      description: "Plan a research-to-training pipeline.",
-      placeholder: "Describe the AI you want to build and what it should know.",
+
+      description:
+        "Turn the target behavior into a reviewable research and training plan.",
+
+      placeholder:
+        "Describe the AI you want, who it helps, and what it should know.",
+
       plan:
-        "1. Turn the goal into measurable behavior requirements.\n" +
-        "2. Search reputable sources and record URLs, dates, and licenses.\n" +
-        "3. Extract relevant information and remove duplicates.\n" +
-        "4. Validate the data and create training examples.\n" +
-        "5. Create training and validation datasets.\n" +
-        "6. Select a compatible model and fine-tuning method.\n" +
-        "7. Evaluate the result before exporting.\n\n" +
-        "Web research, data collection, and model training require a backend and are not connected in this frontend."
+        "1. Convert the goal into measurable behavior requirements.\n" +
+        "2. Search reputable sources and record URLs, dates, and usage/licensing constraints.\n" +
+        "3. Extract relevant material; deduplicate, validate, and filter low-quality content.\n" +
+        "4. Build and review instruction/response examples; create train/validation splits.\n" +
+        "5. Select a compatible base model and training method.\n" +
+        "6. Run a small experiment, evaluate quality/regressions, then scale if justified.\n" +
+        "7. Export and test a GGUF artifact only if supported by the model and conversion pipeline.\n\n" +
+        "Web search, dataset creation, and training are not connected in this prototype."
     }
   };
 
-  function notify(message) {
-    const toast = $("#toast");
-    toast.textContent = message;
-    toast.classList.add("show");
+  function toast(message) {
+    const el = $("#toast");
 
-    clearTimeout(notify.timer);
-    notify.timer = setTimeout(() => {
-      toast.classList.remove("show");
+    el.textContent = message;
+    el.classList.add("show");
+
+    clearTimeout(toast.timer);
+
+    toast.timer = setTimeout(() => {
+      el.classList.remove("show");
     }, 2600);
   }
 
   function formatBytes(bytes) {
-    if (!Number.isFinite(bytes) || bytes < 0) return "—";
-    if (bytes === 0) return "0 B";
+    if (!Number.isFinite(bytes) || bytes < 0) {
+      return "—";
+    }
+
+    if (bytes === 0) {
+      return "0 B";
+    }
 
     const units = ["B", "KB", "MB", "GB", "TB"];
+
     const index = Math.min(
       Math.floor(Math.log(bytes) / Math.log(1024)),
       units.length - 1
     );
 
-    const value = bytes / Math.pow(1024, index);
+    const value = bytes / (1024 ** index);
 
-    return value.toLocaleString(undefined, {
+    return `${value.toLocaleString(undefined, {
       maximumFractionDigits: value < 10 ? 2 : 1
-    }) + " " + units[index];
+    })} ${units[index]}`;
   }
 
   function budgetLabel() {
     const mb = Number($("#budgetRange").value);
 
     return mb >= 1024
-      ? (mb / 1024).toLocaleString(undefined, {
+      ? `${(mb / 1024).toLocaleString(undefined, {
           maximumFractionDigits: 2
-        }) + " GB"
-      : mb + " MB";
+        })} GB`
+      : `${mb} MB`;
   }
 
   function updateBudget() {
@@ -912,18 +1058,20 @@ input[type="range"] {
       return;
     }
 
-    const budgetBytes = Number($("#budgetRange").value) * 1024 * 1024;
-    const fits = state.file.size <= budgetBytes;
+    const fits =
+      state.file.size <= Number($("#budgetRange").value) * 1024 * 1024;
 
     status.textContent = fits ? "Fits budget" : "Over budget";
     status.style.color = fits ? "var(--green)" : "var(--red)";
   }
 
-  function selectFile(file) {
-    if (!file) return;
+  function setFile(file) {
+    if (!file) {
+      return;
+    }
 
     if (!/\.gguf$/i.test(file.name)) {
-      notify("Please select a .gguf file.");
+      toast("Please select a file with the .gguf extension.");
       return;
     }
 
@@ -931,24 +1079,29 @@ input[type="range"] {
 
     $("#fileName").textContent = file.name;
     $("#fileSize").textContent = formatBytes(file.size);
+    $("#fileName").title = file.name;
 
     updateBudget();
-    notify("Selected locally. No model was uploaded.");
+
+    toast("Selected locally. No model data was uploaded.");
   }
 
   function selectTool(key) {
     const tool = tools[key];
 
-    if (!tool) return;
+    if (!tool) {
+      return;
+    }
 
     state.tool = key;
-    state.plan = "";
 
-    $("#workflowTitle").textContent = tool.title;
-    $("#workflowDescription").textContent = tool.description;
+    $("#workspaceTitle").textContent = tool.title;
+    $("#workspaceSubtitle").textContent = tool.description;
     $("#workflowTag").textContent = tool.tag;
     $("#projectNotes").placeholder = tool.placeholder;
     $("#planOutput").textContent = "";
+
+    state.plan = "";
 
     document.querySelectorAll(".tool").forEach((button) => {
       button.setAttribute(
@@ -961,24 +1114,35 @@ input[type="range"] {
   function generatePlan() {
     const key = state.tool || "editor";
 
-    if (!state.tool) selectTool(key);
+    if (!state.tool) {
+      selectTool(key);
+    }
 
     const tool = tools[key];
-    const project = $("#projectName").value.trim() || "Untitled project";
+
+    const name =
+      $("#projectName").value.trim() || "Untitled AI project";
+
     const notes = $("#projectNotes").value.trim();
+
     const model = state.file
-      ? state.file.name + " (" + formatBytes(state.file.size) + ")"
-      : "No model selected";
+      ? `${state.file.name} (${formatBytes(state.file.size)})`
+      : "No GGUF file selected";
 
     state.plan =
-      tool.title + " — " + project + "\n" +
-      "Model: " + model + "\n" +
-      "Size budget: " + budgetLabel() + "\n\n" +
-      tool.plan +
-      (notes ? "\n\nProject requirements:\n" + notes : "");
+      `${tool.title} — ${name}\n` +
+      `Model: ${model}\n` +
+      `Size budget: ${budgetLabel()}\n\n` +
+      `${tool.plan}` +
+      (
+        notes
+          ? `\n\nProject notes:\n${notes}`
+          : "\n\nProject notes: Not specified."
+      );
 
     $("#planOutput").textContent = state.plan;
-    notify("Workflow plan generated.");
+
+    toast("Plan generated locally.");
   }
 
   function saveBrief() {
@@ -988,17 +1152,21 @@ input[type="range"] {
       savedAt: new Date().toISOString(),
       projectName: $("#projectName").value,
       projectNotes: $("#projectNotes").value,
-      selectedTool: state.tool,
-      sizeBudgetMB: Number($("#budgetRange").value),
+      tool: state.tool,
+      budgetMB: Number($("#budgetRange").value),
       modelFileName: state.file ? state.file.name : null,
       plan: state.plan
     };
 
     try {
-      localStorage.setItem("nexora-studio-brief", JSON.stringify(brief));
-      notify("Brief saved locally in this browser.");
+      localStorage.setItem(
+        "nexora-studio-brief",
+        JSON.stringify(brief)
+      );
+
+      toast("Brief saved in this browser.");
     } catch (error) {
-      notify("Local storage is unavailable.");
+      toast("Local storage is unavailable in this browser.");
     }
   }
 
@@ -1007,36 +1175,46 @@ input[type="range"] {
     state.tool = null;
     state.plan = "";
 
-    $("#fileInput").value = "";
+    fileInput.value = "";
+
     $("#fileName").textContent = "No model selected";
     $("#fileSize").textContent = "—";
     $("#projectName").value = "";
     $("#projectNotes").value = "";
     $("#planOutput").textContent = "";
     $("#budgetRange").value = "4096";
-    $("#workflowTitle").textContent = "Workflow configuration";
-    $("#workflowDescription").textContent = "Select a tool above to get started.";
-    $("#workflowTag").textContent = "READY";
 
     document.querySelectorAll(".tool").forEach((button) => {
       button.setAttribute("aria-pressed", "false");
     });
 
+    $("#workspaceTitle").textContent = "Workflow configuration";
+
+    $("#workspaceSubtitle").textContent =
+      "Select a tool above to get started.";
+
+    $("#workflowTag").textContent = "READY";
+
+    $("#projectNotes").placeholder =
+      "Describe the model, goal, error, or training task...";
+
     updateBudget();
-    notify("Workspace reset.");
+
+    toast("Workspace reset.");
   }
 
-  $("#importButton").addEventListener("click", () => {
-    $("#fileInput").click();
+  $("#chooseBtn").addEventListener("click", () => {
+    fileInput.click();
   });
 
-  $("#chooseButton").addEventListener("click", () => {
-    $("#fileInput").click();
+  $("#importTop").addEventListener("click", () => {
+    fileInput.click();
   });
 
-  $("#fileInput").addEventListener("change", (event) => {
+  fileInput.addEventListener("change", (event) => {
     const file = event.target.files && event.target.files[0];
-    selectFile(file);
+
+    setFile(file);
   });
 
   $("#budgetRange").addEventListener("input", updateBudget);
@@ -1047,109 +1225,72 @@ input[type="range"] {
     });
   });
 
-  $("#generateButton").addEventListener("click", generatePlan);
-  $("#saveButton").addEventListener("click", saveBrief);
-  $("#resetButton").addEventListener("click", resetWorkspace);
+  $("#generateBtn").addEventListener("click", generatePlan);
 
-  $("#copyButton").addEventListener("click", async () => {
+  $("#saveBtn").addEventListener("click", saveBrief);
+
+  $("#resetBtn").addEventListener("click", resetWorkspace);
+
+  $("#copyBtn").addEventListener("click", async () => {
     if (!state.plan) {
-      notify("Generate a plan first.");
+      toast("Generate a plan first.");
       return;
     }
 
     try {
       await navigator.clipboard.writeText(state.plan);
-      notify("Plan copied.");
+      toast("Plan copied.");
     } catch (error) {
-      const textarea = document.createElement("textarea");
+      const area = document.createElement("textarea");
 
-      textarea.value = state.plan;
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
+      area.value = state.plan;
+      area.style.position = "fixed";
+      area.style.opacity = "0";
 
-      document.body.appendChild(textarea);
-      textarea.select();
+      document.body.appendChild(area);
+
+      area.select();
 
       const copied = document.execCommand("copy");
-      textarea.remove();
 
-      notify(copied ? "Plan copied." : "Copy failed.");
+      area.remove();
+
+      toast(
+        copied
+          ? "Plan copied."
+          : "Copy failed; select the plan text manually."
+      );
     }
   });
-
-  $("#buildButton").addEventListener("click", () => {
-    const repo = $("#repoUrl").value.trim();
-    const appId = $("#appId").value.trim();
-
-    if (!/^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$/.test(appId)) {
-      notify("Enter a valid application ID, e.g. com.nexora.studio.");
-      $("#appId").focus();
-      return;
-    }
-
-    if (repo && !/^https:\/\/github\.com\/[^/]+\/[^/]+\/?$/.test(repo)) {
-      notify("Enter a valid GitHub repository URL.");
-      $("#repoUrl").focus();
-      return;
-    }
-
-    const lines = [
-      "NEXORA STUDIO — ANDROID BUILD CHECKLIST",
-      "Application ID: " + appId,
-      "Repository: " + (repo || "Not supplied"),
-      "",
-      "1. Use Java 17 for the Android build.",
-      "2. Pin an Android Gradle Plugin and compatible Gradle wrapper version.",
-      "3. Add an Android WebView wrapper.",
-      "4. Package this HTML file as an app asset.",
-      "5. Configure GitHub Actions to build a debug APK.",
-      "6. Upload the APK as a workflow artifact.",
-      "7. Configure release signing separately when needed.",
-      "",
-      "Expected project files:",
-      "settings.gradle",
-      "build.gradle",
-      "gradle.properties",
-      "gradlew and gradle/wrapper/",
-      "app/build.gradle",
-      "app/src/main/AndroidManifest.xml",
-      "app/src/main/assets/index.html",
-      "",
-      "This checklist is generated locally. No Gradle build has run."
-    ];
-
-    $("#buildOutput").textContent = lines.join("\n");
-    $("#buildOutput").classList.remove("hidden");
-
-    notify("Build checklist prepared.");
-  });
-
-  const dropzone = $("#dropzone");
 
   ["dragenter", "dragover"].forEach((eventName) => {
-    dropzone.addEventListener(eventName, (event) => {
+    dropZone.addEventListener(eventName, (event) => {
       event.preventDefault();
-      dropzone.classList.add("drag");
+      dropZone.classList.add("drag");
     });
   });
 
   ["dragleave", "drop"].forEach((eventName) => {
-    dropzone.addEventListener(eventName, (event) => {
+    dropZone.addEventListener(eventName, (event) => {
       event.preventDefault();
-      dropzone.classList.remove("drag");
+      dropZone.classList.remove("drag");
     });
   });
 
-  dropzone.addEventListener("drop", (event) => {
-    const file = event.dataTransfer &&
+  dropZone.addEventListener("drop", (event) => {
+    const file =
+      event.dataTransfer &&
       event.dataTransfer.files &&
       event.dataTransfer.files[0];
 
-    if (file) selectFile(file);
+    if (file) {
+      setFile(file);
+    }
   });
 
   updateBudget();
 })();
 </script>
+
 </body>
 </html>
