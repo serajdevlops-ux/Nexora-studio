@@ -1,0 +1,328 @@
+name: Nexora Studio - Generate Project and Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "index.html"
+      - ".github/workflows/build-apk.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexora-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Generate Android Project and Build APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      APP_ID: com.nexora.studio
+      APP_NAME: Nexora Studio
+      JAVA_VERSION: "17"
+      GRADLE_VERSION: "8.9"
+      AGP_VERSION: "8.7.3"
+      COMPILE_SDK: "35"
+      MIN_SDK: "23"
+      TARGET_SDK: "35"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify root index.html
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! -f index.html ]]; then
+            echo "::error::Root index.html is missing."
+            exit 1
+          fi
+
+          echo "Found root index.html"
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-${COMPILE_SDK}" \
+            "build-tools;35.0.0"
+
+          yes | sdkmanager --licenses >/dev/null || true
+
+      - name: Generate Android project
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p \
+            android/gradle/wrapper \
+            android/app/src/main/java/com/nexora/studio \
+            android/app/src/main/assets
+
+          # Generate Gradle wrapper properties.
+          cat > android/gradle/wrapper/gradle-wrapper.properties <<'EOF'
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-bin.zip
+          networkTimeout=10000
+          validateDistributionUrl=true
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
+
+          # Generate Gradle settings.
+          cat > android/settings.gradle <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+
+          rootProject.name = "NexoraStudio"
+          include(":app")
+          EOF
+
+          # Generate root Gradle configuration.
+          cat > android/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.7.3' apply false
+          }
+          EOF
+
+          # Generate Gradle properties.
+          cat > android/gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx3g -Dfile.encoding=UTF-8
+          org.gradle.parallel=true
+          org.gradle.caching=true
+          android.useAndroidX=true
+          EOF
+
+          # Generate app Gradle configuration.
+          cat > android/app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'com.nexora.studio'
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId 'com.nexora.studio'
+                  minSdk 23
+                  targetSdk 35
+                  versionCode 1
+                  versionName '1.0.0'
+              }
+
+              buildTypes {
+                  debug {
+                      applicationIdSuffix '.debug'
+                      versionNameSuffix '-debug'
+                  }
+
+                  release {
+                      minifyEnabled false
+                  }
+              }
+
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+          }
+          EOF
+
+          # Generate Android manifest.
+          cat > android/app/src/main/AndroidManifest.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+              <uses-permission android:name="android.permission.INTERNET" />
+
+              <application
+                  android:allowBackup="false"
+                  android:label="Nexora Studio"
+                  android:theme="@android:style/Theme.Material.NoActionBar"
+                  android:usesCleartextTraffic="false">
+
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:configChanges="orientation|screenSize|keyboardHidden">
+
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          # Generate Java WebView activity.
+          cat > android/app/src/main/java/com/nexora/studio/MainActivity.java <<'EOF'
+          package com.nexora.studio;
+
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import android.webkit.WebSettings;
+          import android.view.ViewGroup;
+          import android.view.Window;
+          import android.view.WindowManager;
+
+          public class MainActivity extends Activity {
+              private WebView webView;
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+
+                  requestWindowFeature(Window.FEATURE_NO_TITLE);
+                  getWindow().setFlags(
+                      WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                      WindowManager.LayoutParams.FLAG_FULLSCREEN
+                  );
+
+                  webView = new WebView(this);
+
+                  WebSettings settings = webView.getSettings();
+                  settings.setJavaScriptEnabled(true);
+                  settings.setDomStorageEnabled(true);
+                  settings.setAllowFileAccess(true);
+                  settings.setAllowContentAccess(true);
+                  settings.setJavaScriptCanOpenWindowsAutomatically(false);
+                  settings.setSupportMultipleWindows(false);
+
+                  webView.setWebViewClient(new WebViewClient());
+                  webView.setWebChromeClient(new WebChromeClient());
+
+                  webView.setLayoutParams(new ViewGroup.LayoutParams(
+                      ViewGroup.LayoutParams.MATCH_PARENT,
+                      ViewGroup.LayoutParams.MATCH_PARENT
+                  ));
+
+                  setContentView(webView);
+                  webView.loadUrl("file:///android_asset/index.html");
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (webView != null && webView.canGoBack()) {
+                      webView.goBack();
+                  } else {
+                      super.onBackPressed();
+                  }
+              }
+
+              @Override
+              protected void onDestroy() {
+                  if (webView != null) {
+                      webView.destroy();
+                      webView = null;
+                  }
+                  super.onDestroy();
+              }
+          }
+          EOF
+
+          # Preserve the root index.html as the source of truth.
+          cp index.html android/app/src/main/assets/index.html
+
+          # Generate project README.
+          cat > android/README.md <<'EOF'
+          # Nexora Studio Android Project
+
+          Generated automatically by GitHub Actions.
+
+          ## Build
+
+          Requires Java 17, Android SDK 35, and Gradle 8.9.
+
+          From this directory, run:
+
+              gradle assembleDebug
+
+          The root repository index.html is copied into the Android assets
+          directory during the workflow build.
+          EOF
+
+          echo "Android project generated."
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Build debug APK
+        working-directory: android
+        shell: bash
+        run: |
+          set -euo pipefail
+          gradle --no-daemon --stacktrace assembleDebug
+
+      - name: Verify APK
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+
+          if [[ ! -s "$APK" ]]; then
+            echo "::error::APK was not generated."
+            exit 1
+          fi
+
+          ls -lh "$APK"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-studio-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload generated Android source
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-studio-android-source
+          path: android/
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 6
