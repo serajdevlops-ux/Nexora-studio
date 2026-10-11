@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090b12">
+<meta name="description" content="Nexora Studio — your AI development workspace.">
+<title>Nexora Studio</title>
+
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #090b12;
+  --panel: #111520;
+  --line: #252d40;
+  --text: #eef2ff;
+  --muted: #8e9ab4;
+  --accent: #9c7bff;
+  --cyan: #67e8f9;
+  --green: #63e6a5;
+  --red: #ff7d91;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 75% -10%, #222044, transparent 42%),
+    var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 14px;
+}
+
+button, input, textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+.shell {
+  max-width: 1200px;
+  margin: auto;
+  padding: 22px clamp(14px, 3vw, 32px) 40px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #b29aff, #6043bf);
+  font-size: 23px;
+  font-weight: 900;
+}
+
+.brand h1 {
+  font-size: 19px;
+  margin: 0;
+}
+
+.brand p {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 2px 0 0;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 8px 11px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+.hero {
+  margin-bottom: 25px;
+}
+
+.eyebrow {
+  color: var(--cyan);
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.hero h2 {
+  font-size: clamp(30px, 5vw, 44px);
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  margin: 10px 0;
+}
+
+.hero p {
+  max-width: 600px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.button-row {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.btn {
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 10px 14px;
+  background: #171d2b;
+  color: var(--text);
+  font-weight: 650;
+}
+
+.btn:hover {
+  border-color: var(--accent);
+}
+
+.btn.primary {
+  background: linear-gradient(120deg, #a58aff, #7759d9);
+  border-color: transparent;
+  color: white;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.panel {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: linear-gradient(150deg, #141927, #10141e);
+  margin-bottom: 16px;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.panel h3 {
+  font-size: 15px;
+  margin: 0;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.tag {
+  font-size: 10px;
+  font-weight: 800;
+  color: #c7baff;
+  border: 1px solid #40345e;
+  background: #201c30;
+  padding: 5px 8px;
+  border-radius: 8px;
+}
+
+.dropzone {
+  border: 1px dashed #485473;
+  background: #121725;
+  border-radius: 15px;
+  padding: 23px 15px;
+  text-align: center;
+}
+
+.dropzone.drag {
+  border-color: var(--cyan);
+  background: #182334;
+}
+
+.upload-icon {
+  width: 45px;
+  height: 45px;
+  margin: 0 auto 10px;
+  display: grid;
+  place-items: center;
+  background: #282345;
+  border-radius: 14px;
+  font-size: 22px;
+}
+
+.dropzone h4 {
+  margin: 0 0 6px;
+}
+
+.dropzone p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.filename {
+  margin-top: 12px;
+  color: var(--cyan);
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.metric {
+  min-width: 0;
+  padding: 12px;
+  background: #0d111b;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.metric span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.metric strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.storage {
+  margin-top: 20px;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.label-row label {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.label-row output {
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.notice {
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid #40345e;
+  border-radius: 11px;
+  background: #201c30;
+  color: #c9c0e8;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.tools {
+  display: grid;
+  gap: 10px;
+}
+
+.tool {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  text-align: left;
+  color: var(--text);
+  background: #111622;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.tool:hover,
+.tool[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: #171a2a;
+}
+
+.tool-icon {
+  flex: 0 0 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #28223f;
+  color: #c9baff;
+  font-size: 18px;
+}
+
+.tool-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.tool-copy strong {
+  display: block;
+  font-size: 13px;
+}
+
+.tool-copy small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+  margin-top: 4px;
+}
+
+.arrow {
+  color: #77839d;
+  font-size: 20px;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+
+.field label {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 11px;
+  color: var(--text);
+  background: #0b0f18;
+  border: 1px solid #2a3348;
+  border-radius: 10px;
+}
+
+.field textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.output {
+  min-height: 90px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #0a0e16;
+  color: #b9c5dc;
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.output:empty::before {
+  content: "Your results will appear here.";
+  color: #64718a;
+}
+
+.divider {
+  height: 1px;
+  background: var(--line);
+  margin: 18px 0;
+}
+
+.checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.checklist li {
+  display: flex;
+  gap: 9px;
+  font-size: 12px;
+  color: #c0c9dc;
+}
+
+.check {
+  color: var(--green);
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translate(-50%, 15px);
+  opacity: 0;
+  pointer-events: none;
+  padding: 12px 16px;
+  background: #20283a;
+  border: 1px solid #3a4660;
+  border-radius: 12px;
+  transition: .2s;
+  z-index: 10;
+  font-size: 12px;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.footer {
+  margin-top: 20px;
+  color: #66718a;
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 800px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 460px) {
+  .shell {
+    padding: 14px 12px 30px;
+  }
+
+  .panel {
+    padding: 15px;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .metric:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .status .status-text {
+    display: none;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="shell">
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">N</div>
+    <div>
+      <h1>Nexora Studio</h1>
+      <p>Local AI workshop</p>
+    </div>
+  </div>
+
+  <div class="status">
+    <span class="dot"></span>
+    <span class="status-text">Workspace ready</span>
+    <span>v0.1</span>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="eyebrow">Your models. Your workflow.</div>
+  <h2>Build your next AI.</h2>
+  <p>
+    Inspect GGUF files, prepare fine-tuning workflows,
+    diagnose model problems, and configure the Android build.
+  </p>
+
+  <div class="button-row">
+    <button class="btn primary" id="importButton" type="button">
+      + Import GGUF
+    </button>
+    <button class="btn" id="resetButton" type="button">
+      Reset workspace
+    </button>
+  </div>
+</section>
+
+<main>
+<div class="grid">
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h3>Model workspace</h3>
+      <p class="sub">Inspect a local model file.</p>
+    </div>
+    <span class="tag">GGUF</span>
+  </div>
+
+  <div class="dropzone" id="dropzone">
+    <div class="upload-icon">↥</div>
+    <h4>Bring your model</h4>
+    <p>
+      Select or drag a .gguf file here.
+      The browser reads file metadata only.
+    </p>
+
+    <button class="btn primary" id="chooseButton" type="button">
+      Choose GGUF file
+    </button>
+
+    <input
+      id="fileInput"
+      class="hidden"
+      type="file"
+      accept=".gguf,application/octet-stream"
+    >
+
+    <div class="filename" id="fileName">No model selected</div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <span>File size</span>
+      <strong id="fileSize">—</strong>
+    </div>
+    <div class="metric">
+      <span>Size budget</span>
+      <strong id="budgetMetric">4 GB</strong>
+    </div>
+    <div class="metric">
+      <span>Budget status</span>
+      <strong id="budgetStatus">No model</strong>
+    </div>
+  </div>
+
+  <div class="storage">
+    <div class="label-row">
+      <label for="budgetRange">Model size budget</label>
+      <output id="budgetOutput">4 GB</output>
+    </div>
+
+    <input
+      id="budgetRange"
+      type="range"
+      min="256"
+      max="16384"
+      step="256"
+      value="4096"
+    >
+
+    <div class="range-labels">
+      <span>256 MB</span>
+      <span>8 GB</span>
+      <span>16 GB</span>
+    </div>
+
+    <p class="hint">
+      This budget checks file size. It does not resize or quantize a model.
+    </p>
+  </div>
+
+  <div class="notice">
+    Local-first prototype: model inference, binary GGUF editing, and
+    fine-tuning require compatible native engines or a training backend.
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h3>AI toolbench</h3>
+      <p class="sub">Choose a workflow.</p>
+    </div>
+    <span class="tag">4 TOOLS</span>
+  </div>
+
+  <div class="tools">
+    <button class="tool" data-tool="editor" aria-pressed="false" type="button">
+      <span class="tool-icon">⌘</span>
+      <span class="tool-copy">
+        <strong>GGUF Editor</strong>
+        <small>Prepare model inspection and editing checks.</small>
+      </span>
+      <span class="arrow">›</span>
+    </button>
+
+    <button class="tool" data-tool="fixer" aria-pressed="false" type="button">
+      <span class="tool-icon">✳</span>
+      <span class="tool-copy">
+        <strong>Automatic Problem Fixer</strong>
+        <small>Generate a diagnostic plan for model issues.</small>
+      </span>
+      <span class="arrow">›</span>
+    </button>
+
+    <button class="tool" data-tool="manual" aria-pressed="false" type="button">
+      <span class="tool-icon">⚙</span>
+      <span class="tool-copy">
+        <strong>Manual Fine-Tuning</strong>
+        <small>Prepare dataset and training parameters.</small>
+      </span>
+      <span class="arrow">›</span>
+    </button>
+
+    <button class="tool" data-tool="auto" aria-pressed="false" type="button">
+      <span class="tool-icon">✧</span>
+      <span class="tool-copy">
+        <strong>Auto Fine-Tune</strong>
+        <small>Plan a research-to-training workflow.</small>
+      </span>
+      <span class="arrow">›</span>
+    </button>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h3 id="workflowTitle">Workflow configuration</h3>
+      <p class="sub" id="workflowDescription">
+        Select a tool above to get started.
+      </p>
+    </div>
+    <span class="tag" id="workflowTag">READY</span>
+  </div>
+
+  <div class="field">
+    <label for="projectName">Project name</label>
+    <input id="projectName" maxlength="80" placeholder="My AI Assistant">
+  </div>
+
+  <div class="field">
+    <label for="projectNotes">Requirements or problem description</label>
+    <textarea
+      id="projectNotes"
+      maxlength="3000"
+      placeholder="Describe your AI, its goal, or the problem you want to fix..."
+    ></textarea>
+  </div>
+
+  <div class="button-row">
+    <button class="btn primary" id="generateButton" type="button">
+      Generate workflow plan
+    </button>
+    <button class="btn" id="saveButton" type="button">
+      Save brief locally
+    </button>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="panel-head">
+    <div>
+      <h3>Plan output</h3>
+      <p class="sub">Generated locally in this browser.</p>
+    </div>
+    <button class="btn" id="copyButton" type="button">Copy</button>
+  </div>
+
+  <div class="output" id="planOutput" aria-live="polite"></div>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h3>Android build pipeline</h3>
+      <p class="sub">Java 17 and a compatible Gradle build.</p>
+    </div>
+    <span class="tag">ANDROID</span>
+  </div>
+
+  <ul class="checklist">
+    <li><span class="check">✓</span> Single-file HTML interface</li>
+    <li><span class="check">✓</span> Responsive mobile layout</li>
+    <li><span>○</span> Android WebView wrapper</li>
+    <li><span>○</span> Gradle project and wrapper</li>
+    <li><span>○</span> GitHub Actions APK artifact</li>
+    <li><span>○</span> Native GGUF inference engine</li>
+  </ul>
+
+  <div class="divider"></div>
+
+  <div class="field">
+    <label for="repoUrl">GitHub repository URL</label>
+    <input
+      id="repoUrl"
+      type="url"
+      placeholder="https://github.com/you/nexora-studio"
+    >
+  </div>
+
+  <div class="field">
+    <label for="appId">Android application ID</label>
+    <input id="appId" value="com.nexora.studio">
+  </div>
+
+  <button class="btn primary" id="buildButton" type="button">
+    Prepare build checklist
+  </button>
+
+  <div class="output hidden" id="buildOutput" style="margin-top:12px"></div>
+
+  <p class="hint">
+    The HTML interface cannot build an APK by itself. The Android wrapper
+    and GitHub Actions workflow must be added separately.
+  </p>
+</section>
+
+</div>
+</main>
+
+<footer class="footer">
+  <span>Nexora Studio · Prototype v0.1</span>
+  <span>Local interface · No model uploads</span>
+</footer>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+(() => {
+  const $ = (selector) => document.querySelector(selector);
+
+  const state = {
+    file: null,
+    tool: null,
+    plan: ""
+  };
+
+  const tools = {
+    editor: {
+      title: "GGUF Editor",
+      tag: "INSPECT",
+      description: "Prepare a model inspection checklist.",
+      placeholder: "Which model metadata or behavior do you want to inspect?",
+      plan:
+        "1. Inspect the GGUF header and metadata with a compatible parser.\n" +
+        "2. Verify architecture, tensor types, context length, tokenizer, and quantization.\n" +
+        "3. Back up the original before modifying supported metadata.\n" +
+        "4. Validate any output with the target inference runtime.\n\n" +
+        "Binary GGUF editing is not implemented in this frontend."
+    },
+
+    fixer: {
+      title: "Automatic Problem Fixer",
+      tag: "DIAGNOSE",
+      description: "Build a diagnostic plan for a model problem.",
+      placeholder: "Describe the error, runtime, device, and steps already tried.",
+      plan:
+        "1. Reproduce the issue and capture the complete log.\n" +
+        "2. Verify file integrity and runtime compatibility.\n" +
+        "3. Check RAM/VRAM, context length, model architecture, and quantization.\n" +
+        "4. Change one reversible setting at a time.\n" +
+        "5. Preserve the original model and record all changes.\n\n" +
+        "No repair was applied. An actual automatic fixer needs a diagnostic backend."
+    },
+
+    manual: {
+      title: "Manual Fine-Tuning",
+      tag: "MANUAL",
+      description: "Prepare a fine-tuning brief.",
+      placeholder: "Describe the training goal, dataset, model, and hardware.",
+      plan:
+        "1. Identify the model family and obtain compatible original weights.\n" +
+        "2. Prepare a clean, appropriately licensed dataset.\n" +
+        "3. Create training and validation splits.\n" +
+        "4. Select a compatible method such as LoRA or QLoRA.\n" +
+        "5. Configure learning rate, epochs, batch size, and sequence length.\n" +
+        "6. Evaluate the result and export using compatible conversion tools.\n\n" +
+        "GGUF is primarily an inference format; a GGUF file alone is generally not the standard fine-tuning input. No training job was launched."
+    },
+
+    auto: {
+      title: "Auto Fine-Tune",
+      tag: "AUTO PLAN",
+      description: "Plan a research-to-training pipeline.",
+      placeholder: "Describe the AI you want to build and what it should know.",
+      plan:
+        "1. Turn the goal into measurable behavior requirements.\n" +
+        "2. Search reputable sources and record URLs, dates, and licenses.\n" +
+        "3. Extract relevant information and remove duplicates.\n" +
+        "4. Validate the data and create training examples.\n" +
+        "5. Create training and validation datasets.\n" +
+        "6. Select a compatible model and fine-tuning method.\n" +
+        "7. Evaluate the result before exporting.\n\n" +
+        "Web research, data collection, and model training require a backend and are not connected in this frontend."
+    }
+  };
+
+  function notify(message) {
+    const toast = $("#toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    clearTimeout(notify.timer);
+    notify.timer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 2600);
+  }
+
+  function formatBytes(bytes) {
+    if (!Number.isFinite(bytes) || bytes < 0) return "—";
+    if (bytes === 0) return "0 B";
+
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    const index = Math.min(
+      Math.floor(Math.log(bytes) / Math.log(1024)),
+      units.length - 1
+    );
+
+    const value = bytes / Math.pow(1024, index);
+
+    return value.toLocaleString(undefined, {
+      maximumFractionDigits: value < 10 ? 2 : 1
+    }) + " " + units[index];
+  }
+
+  function budgetLabel() {
+    const mb = Number($("#budgetRange").value);
+
+    return mb >= 1024
+      ? (mb / 1024).toLocaleString(undefined, {
+          maximumFractionDigits: 2
+        }) + " GB"
+      : mb + " MB";
+  }
+
+  function updateBudget() {
+    $("#budgetOutput").textContent = budgetLabel();
+    $("#budgetMetric").textContent = budgetLabel();
+
+    const status = $("#budgetStatus");
+
+    if (!state.file) {
+      status.textContent = "No model";
+      status.style.color = "";
+      return;
+    }
+
+    const budgetBytes = Number($("#budgetRange").value) * 1024 * 1024;
+    const fits = state.file.size <= budgetBytes;
+
+    status.textContent = fits ? "Fits budget" : "Over budget";
+    status.style.color = fits ? "var(--green)" : "var(--red)";
+  }
+
+  function selectFile(file) {
+    if (!file) return;
+
+    if (!/\.gguf$/i.test(file.name)) {
+      notify("Please select a .gguf file.");
+      return;
+    }
+
+    state.file = file;
+
+    $("#fileName").textContent = file.name;
+    $("#fileSize").textContent = formatBytes(file.size);
+
+    updateBudget();
+    notify("Selected locally. No model was uploaded.");
+  }
+
+  function selectTool(key) {
+    const tool = tools[key];
+
+    if (!tool) return;
+
+    state.tool = key;
+    state.plan = "";
+
+    $("#workflowTitle").textContent = tool.title;
+    $("#workflowDescription").textContent = tool.description;
+    $("#workflowTag").textContent = tool.tag;
+    $("#projectNotes").placeholder = tool.placeholder;
+    $("#planOutput").textContent = "";
+
+    document.querySelectorAll(".tool").forEach((button) => {
+      button.setAttribute(
+        "aria-pressed",
+        String(button.dataset.tool === key)
+      );
+    });
+  }
+
+  function generatePlan() {
+    const key = state.tool || "editor";
+
+    if (!state.tool) selectTool(key);
+
+    const tool = tools[key];
+    const project = $("#projectName").value.trim() || "Untitled project";
+    const notes = $("#projectNotes").value.trim();
+    const model = state.file
+      ? state.file.name + " (" + formatBytes(state.file.size) + ")"
+      : "No model selected";
+
+    state.plan =
+      tool.title + " — " + project + "\n" +
+      "Model: " + model + "\n" +
+      "Size budget: " + budgetLabel() + "\n\n" +
+      tool.plan +
+      (notes ? "\n\nProject requirements:\n" + notes : "");
+
+    $("#planOutput").textContent = state.plan;
+    notify("Workflow plan generated.");
+  }
+
+  function saveBrief() {
+    const brief = {
+      app: "Nexora Studio",
+      version: "0.1",
+      savedAt: new Date().toISOString(),
+      projectName: $("#projectName").value,
+      projectNotes: $("#projectNotes").value,
+      selectedTool: state.tool,
+      sizeBudgetMB: Number($("#budgetRange").value),
+      modelFileName: state.file ? state.file.name : null,
+      plan: state.plan
+    };
+
+    try {
+      localStorage.setItem("nexora-studio-brief", JSON.stringify(brief));
+      notify("Brief saved locally in this browser.");
+    } catch (error) {
+      notify("Local storage is unavailable.");
+    }
+  }
+
+  function resetWorkspace() {
+    state.file = null;
+    state.tool = null;
+    state.plan = "";
+
+    $("#fileInput").value = "";
+    $("#fileName").textContent = "No model selected";
+    $("#fileSize").textContent = "—";
+    $("#projectName").value = "";
+    $("#projectNotes").value = "";
+    $("#planOutput").textContent = "";
+    $("#budgetRange").value = "4096";
+    $("#workflowTitle").textContent = "Workflow configuration";
+    $("#workflowDescription").textContent = "Select a tool above to get started.";
+    $("#workflowTag").textContent = "READY";
+
+    document.querySelectorAll(".tool").forEach((button) => {
+      button.setAttribute("aria-pressed", "false");
+    });
+
+    updateBudget();
+    notify("Workspace reset.");
+  }
+
+  $("#importButton").addEventListener("click", () => {
+    $("#fileInput").click();
+  });
+
+  $("#chooseButton").addEventListener("click", () => {
+    $("#fileInput").click();
+  });
+
+  $("#fileInput").addEventListener("change", (event) => {
+    const file = event.target.files && event.target.files[0];
+    selectFile(file);
+  });
+
+  $("#budgetRange").addEventListener("input", updateBudget);
+
+  document.querySelectorAll(".tool").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectTool(button.dataset.tool);
+    });
+  });
+
+  $("#generateButton").addEventListener("click", generatePlan);
+  $("#saveButton").addEventListener("click", saveBrief);
+  $("#resetButton").addEventListener("click", resetWorkspace);
+
+  $("#copyButton").addEventListener("click", async () => {
+    if (!state.plan) {
+      notify("Generate a plan first.");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(state.plan);
+      notify("Plan copied.");
+    } catch (error) {
+      const textarea = document.createElement("textarea");
+
+      textarea.value = state.plan;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      const copied = document.execCommand("copy");
+      textarea.remove();
+
+      notify(copied ? "Plan copied." : "Copy failed.");
+    }
+  });
+
+  $("#buildButton").addEventListener("click", () => {
+    const repo = $("#repoUrl").value.trim();
+    const appId = $("#appId").value.trim();
+
+    if (!/^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$/.test(appId)) {
+      notify("Enter a valid application ID, e.g. com.nexora.studio.");
+      $("#appId").focus();
+      return;
+    }
+
+    if (repo && !/^https:\/\/github\.com\/[^/]+\/[^/]+\/?$/.test(repo)) {
+      notify("Enter a valid GitHub repository URL.");
+      $("#repoUrl").focus();
+      return;
+    }
+
+    const lines = [
+      "NEXORA STUDIO — ANDROID BUILD CHECKLIST",
+      "Application ID: " + appId,
+      "Repository: " + (repo || "Not supplied"),
+      "",
+      "1. Use Java 17 for the Android build.",
+      "2. Pin an Android Gradle Plugin and compatible Gradle wrapper version.",
+      "3. Add an Android WebView wrapper.",
+      "4. Package this HTML file as an app asset.",
+      "5. Configure GitHub Actions to build a debug APK.",
+      "6. Upload the APK as a workflow artifact.",
+      "7. Configure release signing separately when needed.",
+      "",
+      "Expected project files:",
+      "settings.gradle",
+      "build.gradle",
+      "gradle.properties",
+      "gradlew and gradle/wrapper/",
+      "app/build.gradle",
+      "app/src/main/AndroidManifest.xml",
+      "app/src/main/assets/index.html",
+      "",
+      "This checklist is generated locally. No Gradle build has run."
+    ];
+
+    $("#buildOutput").textContent = lines.join("\n");
+    $("#buildOutput").classList.remove("hidden");
+
+    notify("Build checklist prepared.");
+  });
+
+  const dropzone = $("#dropzone");
+
+  ["dragenter", "dragover"].forEach((eventName) => {
+    dropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      dropzone.classList.add("drag");
+    });
+  });
+
+  ["dragleave", "drop"].forEach((eventName) => {
+    dropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      dropzone.classList.remove("drag");
+    });
+  });
+
+  dropzone.addEventListener("drop", (event) => {
+    const file = event.dataTransfer &&
+      event.dataTransfer.files &&
+      event.dataTransfer.files[0];
+
+    if (file) selectFile(file);
+  });
+
+  updateBudget();
+})();
+</script>
+</body>
+</html>
