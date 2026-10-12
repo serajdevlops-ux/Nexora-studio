@@ -26,20 +26,33 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: |
+            platform-tools
+            platforms;android-35
+            build-tools;35.0.0
 
       - name: Install Android SDK packages
         run: |
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          set -e
+          sdkmanager --licenses
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
+
+      - name: Verify project files
+        run: |
+          set -e
+          if [ ! -f index.html ]; then
+            echo "::error::index.html was not found in the repository root."
+            exit 1
+          fi
 
       - name: Generate Android project
         shell: bash
         run: |
           set -euo pipefail
-
-          test -f index.html || {
-            echo "ERROR: Root index.html not found."
-            exit 1
-          }
 
           mkdir -p app/src/main/assets
           mkdir -p app/src/main/java/com/nexora/studio
@@ -54,6 +67,7 @@ jobs:
                   gradlePluginPortal()
               }
           }
+
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
               repositories {
@@ -61,6 +75,7 @@ jobs:
                   mavenCentral()
               }
           }
+
           rootProject.name = "NexoraStudio"
           include(":app")
           EOF
@@ -92,6 +107,12 @@ jobs:
                   versionCode 1
                   versionName '1.0'
               }
+
+              buildTypes {
+                  debug {
+                      debuggable true
+                  }
+              }
           }
           EOF
 
@@ -99,15 +120,18 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-              <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+              <uses-permission
+                  android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
               <application
                   android:label="Nexora Studio"
-                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
-                  android:usesCleartextTraffic="false">
+                  android:allowBackup="true"
+                  android:usesCleartextTraffic="false"
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
                   <activity
                       android:name=".MainActivity"
+                      android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
                       android:exported="true">
 
                       <intent-filter>
@@ -130,6 +154,7 @@ jobs:
           import android.os.Bundle;
           import android.os.Environment;
           import android.provider.Settings;
+          import android.webkit.JavascriptInterface;
           import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
@@ -138,12 +163,14 @@ jobs:
 
           public class MainActivity extends Activity {
               private WebView webView;
+              private boolean permissionScreenOpened = false;
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
 
                   webView = new WebView(this);
+
                   WebSettings settings = webView.getSettings();
                   settings.setJavaScriptEnabled(true);
                   settings.setDomStorageEnabled(true);
@@ -152,33 +179,50 @@ jobs:
 
                   webView.setWebViewClient(new WebViewClient());
                   webView.setWebChromeClient(new WebChromeClient());
+                  webView.addJavascriptInterface(new NexoraBridge(), "NexoraAndroid");
+
                   setContentView(webView);
                   webView.loadUrl("file:///android_asset/index.html");
 
-                  webView.postDelayed(this::requestAllFilesAccess, 700);
+                  webView.postDelayed(this::requestAllFilesAccess, 800);
               }
 
               private void requestAllFilesAccess() {
-                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                      if (Environment.isExternalStorageManager()) {
-                          notifyPage(true);
-                          return;
-                      }
+                  if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                      dispatchPermissionState(true);
+                      return;
+                  }
 
+                  if (Environment.isExternalStorageManager()) {
+                      dispatchPermissionState(true);
+                      return;
+                  }
+
+                  if (permissionScreenOpened) {
+                      return;
+                  }
+
+                  permissionScreenOpened = true;
+
+                  try {
+                      Intent intent = new Intent(
+                          Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                          Uri.parse("package:" + getPackageName())
+                      );
+                      startActivity(intent);
+                  } catch (Exception exception) {
                       try {
-                          Intent intent = new Intent(
-                              Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
-                              Uri.parse("package:" + getPackageName())
-                          );
-                          startActivity(intent);
-                      } catch (Exception e) {
                           Intent intent = new Intent(
                               Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
                           );
                           startActivity(intent);
+                      } catch (Exception secondException) {
+                          Toast.makeText(
+                              this,
+                              "Unable to open file access settings.",
+                              Toast.LENGTH_LONG
+                          ).show();
                       }
-                  } else {
-                      notifyPage(true);
                   }
               }
 
@@ -188,24 +232,41 @@ jobs:
 
                   if (webView != null) {
                       webView.postDelayed(() -> {
-                          boolean granted = Build.VERSION.SDK_INT < Build.VERSION_CODES.R
+                          boolean granted =
+                              Build.VERSION.SDK_INT < Build.VERSION_CODES.R
                               || Environment.isExternalStorageManager();
-                          notifyPage(granted);
+
+                          dispatchPermissionState(granted);
                       }, 300);
                   }
               }
 
-              private void notifyPage(boolean granted) {
+              private void dispatchPermissionState(boolean granted) {
                   if (webView != null) {
-                      webView.evaluateJavascript(
-                          "window.dispatchEvent(new CustomEvent('nexora-file-access', {detail: {granted: "
-                              + granted + "}}));",
-                          null
-                      );
+                      String script =
+                          "window.dispatchEvent(new CustomEvent(" +
+                          "'nexora-file-access',{detail:{granted:" +
+                          granted + "}}));";
+
+                      webView.evaluateJavascript(script, null);
+                  }
+              }
+
+              private class NexoraBridge {
+                  @JavascriptInterface
+                  public boolean hasAllFilesAccess() {
+                      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                          return Environment.isExternalStorageManager();
+                      }
+                      return true;
                   }
 
-                  if (granted) {
-                      Toast.makeText(this, "File access enabled", Toast.LENGTH_SHORT).show();
+                  @JavascriptInterface
+                  public void requestAllFilesAccess() {
+                      runOnUiThread(() -> {
+                          permissionScreenOpened = false;
+                          MainActivity.this.requestAllFilesAccess();
+                      });
                   }
               }
 
@@ -221,21 +282,35 @@ jobs:
               @Override
               protected void onDestroy() {
                   if (webView != null) {
+                      webView.removeJavascriptInterface("NexoraAndroid");
                       webView.destroy();
                       webView = null;
                   }
+
                   super.onDestroy();
               }
           }
           EOF
 
-      - name: Install Gradle
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
 
       - name: Build debug APK
-        run: gradle --no-daemon assembleDebug
+        run: gradle --no-daemon --stacktrace assembleDebug
+
+      - name: Verify APK exists
+        run: |
+          set -e
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+
+          if [ ! -f "$APK" ]; then
+            echo "::error::APK build did not produce $APK"
+            exit 1
+          fi
+
+          ls -lh "$APK"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -243,3 +318,4 @@ jobs:
           name: nexora-studio-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+          retention-days: 14
