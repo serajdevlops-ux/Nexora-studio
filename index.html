@@ -2,1175 +2,1186 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#090b12">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090b14">
 <title>Nexora Studio</title>
 
 <style>
 :root {
-    --bg: #090b12;
-    --panel: #111522;
-    --panel2: #171d2d;
-    --border: #272f43;
-    --text: #f2f5ff;
-    --muted: #98a3ba;
-    --accent: #8b5cf6;
-    --accent2: #5eead4;
-    --danger: #fb7185;
-    --success: #4ade80;
+  color-scheme: dark;
+  --bg: #090b14;
+  --panel: #121626;
+  --panel2: #191f32;
+  --border: #2b3249;
+  --text: #f3f4ff;
+  --muted: #a0a8c2;
+  --purple: #a78bfa;
+  --cyan: #5eead4;
+  --green: #4ade80;
 }
 
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
-    margin: 0;
-    color: var(--text);
-    background:
-        radial-gradient(ellipse at top left, #1c1640 0, transparent 45%),
-        var(--bg);
-    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
-                 "Segoe UI", sans-serif;
+  margin: 0;
+  background: radial-gradient(ellipse at top left,#20143a 0,transparent 40%),var(--bg);
+  color: var(--text);
+  font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 
-button, input, select, textarea {
-    font: inherit;
+button,input,textarea,select { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
 }
 
-button {
-    cursor: pointer;
+.app { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 245px;
+  flex-shrink: 0;
+  background: #0b0e19;
+  border-right: 1px solid var(--border);
+  padding: 20px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-button:disabled {
-    opacity: .5;
-    cursor: not-allowed;
-}
-
-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 18px 5%;
-    border-bottom: 1px solid var(--border);
-    background: rgba(9, 11, 18, .9);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    backdrop-filter: blur(18px);
-}
-
+.brand { display: flex; align-items: center; gap: 11px; padding: 5px 7px 17px; }
 .logo {
-    font-weight: 900;
-    font-size: 22px;
-    letter-spacing: -.8px;
+  width: 43px; height: 43px; border-radius: 13px;
+  display: grid; place-items: center;
+  color: #090b14; font-size: 25px; font-weight: 900;
+  background: linear-gradient(135deg,var(--purple),var(--cyan));
+}
+.brand-name { font-weight: 850; font-size: 17px; }
+.brand-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+.section-label {
+  color: #7f89a8; font-size: 10px; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 0 10px 7px;
 }
 
-.logo span {
-    color: var(--accent2);
+.nav {
+  display: block; width: 100%; text-align: left; color: #b7bfd7;
+  background: transparent; border: 1px solid transparent;
+  border-radius: 9px; padding: 11px; margin: 3px 0; font-size: 12px;
 }
+.nav:hover { background: var(--panel2); }
+.nav.active { background: #8b5cf621; border-color: #8b5cf650; color: white; }
 
-.status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--muted);
-    font-size: 12px;
+.sidebar-bottom {
+  margin-top: auto; background: var(--panel);
+  border: 1px solid var(--border); border-radius: 12px; padding: 12px;
 }
-
 .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--success);
-    box-shadow: 0 0 12px #4ade8066;
+  display: inline-block; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--green); margin-right: 6px;
 }
 
-main {
-    width: min(1100px, 92%);
-    margin: 36px auto 80px;
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar {
+  min-height: 64px; padding: 12px 23px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: #090b14cc;
+}
+.top-title { font-weight: 750; font-size: 14px; }
+.top-right { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.pill {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 99px; padding: 7px 10px; color: #c3c9df; font-size: 10px;
+}
+.content { width: 100%; max-width: 1100px; margin: 0 auto; padding: 26px; flex: 1; }
+.page { display: none; }
+.page.active { display: block; }
+
+.eyebrow {
+  color: var(--cyan); font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; font-weight: 800; margin-bottom: 10px;
+}
+h1 { font-size: clamp(27px,4vw,39px); letter-spacing: -1px; margin: 0 0 12px; }
+h2 { font-size: 19px; margin: 0 0 12px; }
+h3 { font-size: 14px; margin: 0 0 8px; }
+p { font-size: 12px; line-height: 1.7; color: var(--muted); }
+.gradient {
+  background: linear-gradient(90deg,#c4b5fd,var(--cyan));
+  color: transparent; background-clip: text; -webkit-background-clip: text;
 }
 
 .hero {
-    padding: 34px 0 24px;
+  border: 1px solid #8b5cf644; border-radius: 18px;
+  background: radial-gradient(ellipse at top right,#8b5cf626,transparent 55%),var(--panel);
+  padding: clamp(20px,4vw,35px); margin-bottom: 22px;
 }
-
-.eyebrow {
-    color: var(--accent2);
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-}
-
-h1 {
-    font-size: clamp(32px, 6vw, 58px);
-    line-height: 1.05;
-    letter-spacing: -2px;
-    margin: 12px 0;
-}
-
-.gradient {
-    background: linear-gradient(90deg, #a78bfa, #5eead4);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
-
-.subtitle {
-    max-width: 680px;
-    color: var(--muted);
-    line-height: 1.7;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-}
+.hero p { max-width: 650px; }
+.row { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+.grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
 
 .card {
-    background: linear-gradient(145deg, #141a2a, #0e121e);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 23px;
-    min-width: 0;
+  min-width: 0; padding: 18px; border: 1px solid var(--border);
+  border-radius: 14px; background: linear-gradient(145deg,#151a2b,#101421);
+}
+.card p { margin: 7px 0 14px; }
+.card-icon {
+  display: grid; place-items: center; width: 39px; height: 39px;
+  border-radius: 11px; margin-bottom: 13px; font-size: 18px;
+  background: #8b5cf620; border: 1px solid #8b5cf644;
 }
 
-.card h2, .card h3 {
-    margin-top: 0;
+.btn {
+  border: 1px solid var(--border); background: var(--panel2);
+  color: var(--text); padding: 10px 13px; border-radius: 9px; font-size: 11px;
 }
-
-.card p {
-    color: var(--muted);
-    line-height: 1.6;
-    font-size: 14px;
-}
-
-.tool-icon {
-    font-size: 28px;
-    margin-bottom: 12px;
-}
-
-.primary, .secondary, .danger {
-    border: 0;
-    border-radius: 10px;
-    padding: 12px 16px;
-    font-weight: 750;
-}
-
+.btn:hover { filter: brightness(1.15); }
 .primary {
-    color: #fff;
-    background: linear-gradient(100deg, #7c3aed, #6366f1);
+  border: 0; color: #08111a; font-weight: 800;
+  background: linear-gradient(100deg,var(--purple),var(--cyan));
 }
+.danger { color: #fda4af; border-color: #fb718544; }
 
-.secondary {
-    background: #20283a;
-    color: var(--text);
-    border: 1px solid var(--border);
+label { display: block; color: #c7cce0; font-size: 11px; margin-bottom: 7px; }
+input,textarea,select {
+  width: 100%; border: 1px solid var(--border); border-radius: 9px;
+  background: #090c17; color: var(--text); padding: 11px; font-size: 12px;
 }
-
-.danger {
-    background: #3b1725;
-    color: #fecdd3;
-    border: 1px solid #713047;
-}
-
-button:hover:not(:disabled) {
-    filter: brightness(1.12);
-}
-
-.full {
-    width: 100%;
-}
-
-.section {
-    margin-top: 22px;
-}
-
-.hidden {
-    display: none !important;
-}
-
-label {
-    display: block;
-    color: #d9e0f0;
-    font-size: 13px;
-    font-weight: 700;
-    margin: 15px 0 8px;
-}
-
-input, select, textarea {
-    width: 100%;
-    color: var(--text);
-    background: #0b0f19;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    outline: none;
-}
-
-input:focus, select:focus, textarea:focus {
-    border-color: var(--accent);
-}
-
-textarea {
-    min-height: 110px;
-    resize: vertical;
-}
-
-.memory-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 10px;
-}
-
-.memory-option {
-    padding: 13px 6px;
-    background: #0b0f19;
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-weight: 800;
-}
-
-.memory-option.selected {
-    background: #32235d;
-    border-color: #a78bfa;
-    color: #ddd6fe;
-}
-
-.small {
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.6;
-}
+textarea { min-height: 105px; resize: vertical; }
+input[type="file"] { padding: 9px; }
+input[type="range"] { padding: 0; accent-color: var(--purple); }
+.form-group { margin: 15px 0; }
 
 .notice {
-    background: #171b2a;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--muted);
+  border: 1px solid #5eead435; background: #5eead40b;
+  border-radius: 10px; padding: 12px; color: #bdece5;
+  font-size: 11px; line-height: 1.7; margin: 14px 0;
+}
+.warning { border-color: #fbbf243d; background: #fbbf240b; color: #fce7a0; }
+
+.output {
+  min-height: 48px; padding: 13px; background: #090c17;
+  border: 1px solid var(--border); border-radius: 9px;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  font-family: ui-monospace,Consolas,monospace;
+  font-size: 11px; line-height: 1.7; color: #bcefe7;
+}
+.stat { font-size: 25px; font-weight: 850; }
+.stat-label { color: var(--muted); font-size: 10px; margin-top: 5px; }
+
+.chat-layout {
+  display: flex; flex-direction: column; height: min(68vh,720px);
+  min-height: 430px; border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden; background: #0b0e19;
+}
+.chat-head {
+  padding: 12px 15px; display: flex; justify-content: space-between;
+  align-items: center; gap: 8px; border-bottom: 1px solid var(--border);
+}
+.chat-head strong { font-size: 12px; }
+.small { color: var(--muted); font-size: 10px; line-height: 1.6; }
+.messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+.message {
+  max-width: 90%; align-self: flex-start; padding: 11px 13px;
+  border: 1px solid var(--border); border-radius: 12px;
+  background: #151a2a; font-size: 12px; line-height: 1.7;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.message.user { align-self: flex-end; background: #7c3aed25; border-color: #8b5cf655; }
+.message-label { display: block; color: var(--cyan); font-weight: 800; font-size: 10px; margin-bottom: 5px; }
+.chat-compose { border-top: 1px solid var(--border); padding: 11px; }
+.chat-compose .row { align-items: flex-end; }
+.chat-compose textarea { min-height: 43px; max-height: 140px; resize: vertical; flex: 1; }
+.chat-compose button { min-height: 43px; }
+.chat-hint { color: #8992ae; font-size: 10px; margin-top: 8px; }
+
+.memory-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; }
+.mem { position: relative; }
+.mem input { position: absolute; opacity: 0; pointer-events: none; }
+.mem span {
+  display: block; cursor: pointer; text-align: center; padding: 12px 3px;
+  border: 1px solid var(--border); background: #090c17; border-radius: 8px; font-size: 11px;
+}
+.mem input:checked + span { border-color: var(--cyan); color: var(--cyan); background: #5eead410; }
+
+.progress-track { height: 6px; background: #252a3e; border-radius: 99px; overflow: hidden; margin: 10px 0; }
+.progress { height: 100%; width: 0; background: linear-gradient(90deg,var(--purple),var(--cyan)); }
+
+.hidden { display: none !important; }
+.mobile-menu { display: none; }
+.toast {
+  position: fixed; z-index: 100; bottom: 20px; right: 20px; max-width: 340px;
+  padding: 13px 16px; background: #191f32; border: 1px solid #5eead455;
+  border-radius: 10px; font-size: 12px; box-shadow: 0 10px 35px #0008;
 }
 
-.notice.success {
-    border-color: #23583b;
-    color: #bbf7d0;
+@media(max-width:850px) {
+  .sidebar { position: fixed; z-index: 50; top: 0; bottom: 0; left: 0; transform: translateX(-105%); transition: transform .2s; box-shadow: 15px 0 40px #0008; }
+  .sidebar.open { transform: translateX(0); }
+  .mobile-menu { display: inline-block; }
+  .content { padding: 19px 14px; }
+  .topbar { padding: 12px 14px; }
+  .grid3 { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
-
-.notice.warning {
-    border-color: #665021;
-    color: #fde68a;
-}
-
-.progress {
-    width: 100%;
-    height: 8px;
-    overflow: hidden;
-    background: #252b3b;
-    border-radius: 20px;
-    margin: 14px 0;
-}
-
-.progress-bar {
-    width: 0;
-    height: 100%;
-    background: linear-gradient(90deg, #8b5cf6, #5eead4);
-    transition: width .3s;
-}
-
-.row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-.row > * {
-    flex: 1;
-}
-
-.file-box {
-    border: 1px dashed #47516a;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-}
-
-pre {
-    background: #080b12;
-    border: 1px solid var(--border);
-    padding: 16px;
-    border-radius: 12px;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    color: #c4b5fd;
-    font-size: 12px;
-    line-height: 1.6;
-}
-
-footer {
-    border-top: 1px solid var(--border);
-    padding: 24px 5%;
-    text-align: center;
-    color: var(--muted);
-    font-size: 12px;
-}
-
-@media (max-width: 700px) {
-    .grid {
-        grid-template-columns: 1fr;
-    }
-
-    .memory-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-
-    header {
-        padding: 15px 4%;
-    }
-
-    main {
-        width: 92%;
-        margin-top: 20px;
-    }
-
-    .card {
-        padding: 18px;
-    }
+@media(max-width:540px) {
+  .grid,.grid3 { grid-template-columns: 1fr; }
+  .memory-grid { grid-template-columns: repeat(4,minmax(0,1fr)); }
+  .content { padding: 16px 11px; }
+  .message { max-width: 96%; }
+  .chat-layout { height: 65vh; min-height: 400px; }
 }
 </style>
 </head>
 
 <body>
+<div class="app">
 
-<header>
-    <div class="logo">NEXORA<span> STUDIO</span></div>
-    <div class="status">
-        <span class="dot"></span>
-        <span id="connectionStatus">Studio ready</span>
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="logo">N</div>
+    <div>
+      <div class="brand-name">Nexora Studio</div>
+      <div class="brand-sub">JAVASCRIPT AI WORKSPACE</div>
     </div>
-</header>
+  </div>
 
-<main>
-    <section class="hero">
-        <div class="eyebrow">Your AI workshop</div>
-        <h1>Build your next<br><span class="gradient">intelligence.</span></h1>
-        <p class="subtitle">
-            Manage GGUF models, prepare fine-tuning jobs, configure local
-            memory budgets, and build your Android application.
-        </p>
-    </section>
+  <div>
+    <div class="section-label">Workspace</div>
+    <button class="nav active" data-page="home">⌂ &nbsp; Dashboard</button>
+    <button class="nav" data-page="chat">✧ &nbsp; AI Assistant</button>
+    <button class="nav" data-page="gguf">▤ &nbsp; GGUF Inspector</button>
+    <button class="nav" data-page="fixer">⌘ &nbsp; Code Diagnostics</button>
+    <button class="nav" data-page="manual">⚙ &nbsp; Training Config</button>
+    <button class="nav" data-page="auto">⟳ &nbsp; Auto Trainer Planner</button>
+  </div>
 
-    <!-- FIRST-RUN MEMORY SELECTION -->
-    <section id="setupSection" class="card section hidden">
-        <div class="eyebrow">First-launch setup</div>
-        <h2>Choose your AI memory budget</h2>
-        <p>
-            Select a RAM budget for model inference. This is not the model
-            download size. Actual compatibility depends on your device,
-            model quantization, context length, and available RAM.
-        </p>
+  <div>
+    <div class="section-label">Configuration</div>
+    <button class="nav" data-page="model">⬇ &nbsp; Model Manager</button>
+    <button class="nav" data-page="settings">☷ &nbsp; Settings</button>
+  </div>
 
-        <div id="memoryChoices" class="memory-grid"></div>
+  <div class="sidebar-bottom">
+    <div style="font-size:12px;font-weight:700"><span class="dot"></span>JavaScript ready</div>
+    <p class="small" style="margin-bottom:0">A trained model and compatible inference runtime are required for LLM-quality responses.</p>
+  </div>
+</aside>
 
-        <p id="memoryWarning" class="small"></p>
+<main class="main">
+  <header class="topbar">
+    <div class="row">
+      <button class="btn mobile-menu" id="menuBtn">☰</button>
+      <div class="top-title" id="topTitle">Dashboard</div>
+    </div>
+    <div class="top-right">
+      <span class="pill" id="memoryPill">Memory: 4 GB</span>
+      <span class="pill" id="modelPill">No model loaded</span>
+    </div>
+  </header>
 
-        <button id="saveMemory" class="primary full">
-            Save memory setting
-        </button>
-    </section>
+  <div class="content">
 
     <!-- DASHBOARD -->
-    <section id="dashboard">
+    <section class="page active" id="page-home">
+      <div class="hero">
+        <div class="eyebrow">Your AI development environment</div>
+        <h1>Welcome to <span class="gradient">Nexora Studio.</span></h1>
+        <p>JavaScript tools for model inspection, code diagnostics, training configuration, and local assistant experiments.</p>
+        <div class="row">
+          <button class="btn primary" data-go="chat">Open assistant →</button>
+          <button class="btn" data-go="model">Configure model</button>
+          <button class="btn" data-go="settings">Memory settings</button>
+        </div>
+      </div>
+
+      <div class="grid3" style="margin-bottom:22px">
+        <div class="card"><div class="stat" id="statMemory">4 GB</div><div class="stat-label">Configured memory budget</div></div>
+        <div class="card"><div class="stat" id="statMessages">0</div><div class="stat-label">Saved chat messages</div></div>
+        <div class="card"><div class="stat" id="statModel">None</div><div class="stat-label">Model status</div></div>
+      </div>
+
+      <h2>Your tools</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="card-icon">✧</div><h3>JavaScript Assistant</h3>
+          <p>Try the built-in experimental generator or configure a model for real inference.</p>
+          <button class="btn" data-go="chat">Open assistant →</button>
+        </div>
+        <div class="card">
+          <div class="card-icon">▤</div><h3>GGUF Inspector</h3>
+          <p>Read a GGUF file's header and basic metadata without modifying the model.</p>
+          <button class="btn" data-go="gguf">Inspect file →</button>
+        </div>
+        <div class="card">
+          <div class="card-icon">⌘</div><h3>Code Diagnostics</h3>
+          <p>Check JSON, basic JavaScript syntax, and common errors.</p>
+          <button class="btn" data-go="fixer">Analyze code →</button>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚙</div><h3>Training Utilities</h3>
+          <p>Prepare a training configuration and export it as JSON.</p>
+          <button class="btn" data-go="manual">Configure training →</button>
+        </div>
+      </div>
+
+      <div class="notice warning">
+        The built-in generator is experimental and is not a pretrained language model.
+        The memory setting is a budget preference, not a reservation of physical RAM.
+      </div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="page" id="page-chat">
+      <div class="eyebrow">Assistant workspace</div>
+      <h1>AI <span class="gradient">Assistant</span></h1>
+      <p>Conversation history is saved locally in this browser when storage is available.</p>
+
+      <div class="notice warning" id="runtimeNotice">
+        Experimental mode: no trained language model is connected. Select a model and connect a supported inference engine for genuine LLM responses.
+      </div>
+
+      <div class="chat-layout">
+        <div class="chat-head">
+          <div>
+            <strong>Nexora Assistant</strong>
+            <div class="small" id="chatStatus">Experimental JavaScript generator</div>
+          </div>
+          <button class="btn" id="clearChat">Clear history</button>
+        </div>
+        <div class="messages" id="messages" aria-live="polite"></div>
+        <div class="chat-compose">
+          <div class="row">
+            <textarea id="chatInput" placeholder="Ask something..." rows="1" aria-label="Message"></textarea>
+            <button class="btn primary" id="sendBtn">Send</button>
+          </div>
+          <div class="chat-hint">Enter to send · Shift+Enter for a new line</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GGUF -->
+    <section class="page" id="page-gguf">
+      <div class="eyebrow">Model utilities</div>
+      <h1>GGUF <span class="gradient">Inspector</span></h1>
+      <p>Inspect a local GGUF file. This reads its header; it does not run or edit the model.</p>
+      <div class="card">
+        <div class="form-group">
+          <label for="ggufFile">Choose GGUF file</label>
+          <input id="ggufFile" type="file" accept=".gguf,application/octet-stream">
+        </div>
+        <button class="btn primary" id="inspectBtn">Inspect GGUF</button>
+        <div class="form-group"><label>Result</label><div class="output" id="ggufOutput">No file selected.</div></div>
+        <div class="notice">A GGUF file needs a compatible inference runtime to generate text. This inspector does not decode tensor weights.</div>
+      </div>
+    </section>
+
+    <!-- CODE DIAGNOSTICS -->
+    <section class="page" id="page-fixer">
+      <div class="eyebrow">Developer tools</div>
+      <h1>Code <span class="gradient">Diagnostics</span></h1>
+      <p>Run basic checks against code or error messages.</p>
+      <div class="card">
+        <div class="form-group">
+          <label for="codeType">Code type</label>
+          <select id="codeType">
+            <option value="javascript">JavaScript</option>
+            <option value="json">JSON</option>
+            <option value="html">HTML</option>
+            <option value="yaml">YAML (basic checks)</option>
+            <option value="text">Error message / other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="codeInput">Code or error message</label>
+          <textarea id="codeInput" placeholder="Paste code or an error message..."></textarea>
+        </div>
+        <button class="btn primary" id="analyzeBtn">Analyze</button>
+        <div class="form-group"><label>Diagnostics</label><div class="output" id="diagnostics">Waiting for input.</div></div>
+      </div>
+    </section>
+
+    <!-- MANUAL TRAINING -->
+    <section class="page" id="page-manual">
+      <div class="eyebrow">Training utilities</div>
+      <h1>Training <span class="gradient">Configuration</span></h1>
+      <p>Prepare an exportable training configuration. Exporting settings does not itself train a model.</p>
+      <div class="card">
+        <div class="form-group"><label for="trainModel">Base model path or name</label><input id="trainModel" placeholder="e.g. models/base-model.gguf"></div>
+        <div class="form-group"><label for="datasetPath">Dataset path</label><input id="datasetPath" placeholder="e.g. datasets/train.jsonl"></div>
         <div class="grid">
-
-            <article class="card">
-                <div class="tool-icon">🧩</div>
-                <h2>GGUF Editor</h2>
-                <p>
-                    Select a GGUF model, inspect its file details, and
-                    prepare compatible model operations.
-                </p>
-                <button class="primary full" data-open="ggufSection">
-                    Open GGUF Editor
-                </button>
-            </article>
-
-            <article class="card">
-                <div class="tool-icon">🛠️</div>
-                <h2>Automatic Problem Fixer</h2>
-                <p>
-                    Describe a model or training problem and prepare
-                    diagnostic steps for a connected backend.
-                </p>
-                <button class="primary full" data-open="fixerSection">
-                    Open Problem Fixer
-                </button>
-            </article>
-
-            <article class="card">
-                <div class="tool-icon">🎛️</div>
-                <h2>Manual Fine-Tuning</h2>
-                <p>
-                    Configure a training job, dataset, base model,
-                    training method, and output format.
-                </p>
-                <button class="primary full" data-open="manualSection">
-                    Configure Fine-Tuning
-                </button>
-            </article>
-
-            <article class="card">
-                <div class="tool-icon">🧠</div>
-                <h2>Automatic Fine-Tuning</h2>
-                <p>
-                    Describe the AI you want to build and prepare a
-                    research and training plan.
-                </p>
-                <button class="primary full" data-open="autoSection">
-                    Build an AI Plan
-                </button>
-            </article>
-
+          <div class="form-group"><label for="epochs">Epochs</label><input id="epochs" type="number" min="1" max="100" value="3"></div>
+          <div class="form-group"><label for="batchSize">Batch size</label><input id="batchSize" type="number" min="1" max="1024" value="4"></div>
+          <div class="form-group"><label for="learningRate">Learning rate</label><input id="learningRate" type="number" min="0.00000001" max="1" step="0.0001" value="0.0002"></div>
+          <div class="form-group"><label for="fineTuneMethod">Method</label><select id="fineTuneMethod"><option value="lora">LoRA</option><option value="qlora">QLoRA</option><option value="full">Full fine-tuning</option></select></div>
         </div>
-
-        <!-- PERSISTENT MODEL -->
-        <section class="card section">
-            <div class="eyebrow">Local model storage</div>
-            <h2>Your AI model</h2>
-            <p>
-                Check for an existing GGUF file before downloading anything.
-                A valid existing model should be reused after app updates.
-            </p>
-
-            <div class="notice" id="modelStatus">
-                Checking model storage support...
-            </div>
-
-            <label for="modelUrl">GGUF download URL</label>
-            <input
-                id="modelUrl"
-                type="url"
-                placeholder="https://your-host.example/model.gguf"
-            >
-
-            <p class="small">
-                Use a trusted direct-download URL that you are authorized
-                to access. Large model downloads require sufficient disk
-                space and a server that supports large files.
-            </p>
-
-            <div class="row">
-                <button id="checkModel" class="secondary">
-                    Check existing model
-                </button>
-                <button id="downloadModel" class="primary">
-                    Download model
-                </button>
-            </div>
-
-            <div class="progress">
-                <div id="downloadProgress" class="progress-bar"></div>
-            </div>
-
-            <p id="downloadStatus" class="small" aria-live="polite">
-                No download started.
-            </p>
-
-            <button id="chooseModelFolder" class="secondary full">
-                Choose model folder
-            </button>
-
-            <p class="small">
-                Folder selection requires browser support or a native
-                Android integration. The Android bridge can be implemented
-                in the app's WebView host.
-            </p>
-        </section>
-
-        <!-- ANDROID BUILD -->
-        <section class="card section">
-            <div class="eyebrow">Android deployment</div>
-            <h2>Build your APK</h2>
-            <p>
-                Use your GitHub Actions workflow to generate the Android
-                project and build the APK from this frontend.
-            </p>
-
-            <label for="repoUrl">GitHub repository</label>
-            <input
-                id="repoUrl"
-                type="url"
-                value="https://github.com/serajdevlops-ux/Nexora-studio"
-            >
-
-            <label for="appId">Android application ID</label>
-            <input
-                id="appId"
-                type="text"
-                value="com.nexora.studio"
-            >
-
-            <div class="notice warning">
-                A 20 GB model should not be embedded in the APK.
-                Store it separately and retain it across application updates.
-            </div>
-        </section>
+        <button class="btn primary" id="exportTraining">Export configuration JSON</button>
+        <div class="form-group"><label>Configuration preview</label><div class="output" id="trainingOutput">Set your training options.</div></div>
+      </div>
     </section>
 
-    <!-- GGUF EDITOR -->
-    <section id="ggufSection" class="card section hidden">
-        <button class="secondary" data-home>← Dashboard</button>
-        <h2>GGUF Editor</h2>
-        <p>Select a GGUF file to inspect its basic file metadata.</p>
-
-        <div class="file-box">
-            <input id="ggufFile" type="file" accept=".gguf">
-            <p class="small">Select a local GGUF file.</p>
+    <!-- AUTO TRAINER -->
+    <section class="page" id="page-auto">
+      <div class="eyebrow">Workflow planner</div>
+      <h1>Auto <span class="gradient">Trainer</span></h1>
+      <p>Generate a proposed workflow from your goal. This planner does not automatically search the web or run model training.</p>
+      <div class="card">
+        <div class="form-group">
+          <label for="trainingGoal">Describe the AI you want</label>
+          <textarea id="trainingGoal" placeholder="Example: Build a coding assistant that explains JavaScript errors..."></textarea>
         </div>
-
-        <div id="ggufInfo" class="notice section">
-            No model selected.
+        <div class="form-group">
+          <label for="trainingData">Available training data</label>
+          <select id="trainingData">
+            <option value="none">No dataset yet</option>
+            <option value="own">I have my own dataset</option>
+            <option value="public">I plan to use a public dataset</option>
+          </select>
         </div>
-
-        <label for="ggufTask">Operation</label>
-        <select id="ggufTask">
-            <option value="inspect">Inspect file</option>
-            <option value="validate">Validate GGUF header</option>
-            <option value="prepare">Prepare an editing task</option>
-        </select>
-
-        <button id="inspectGguf" class="primary full section">
-            Run inspection
-        </button>
-
-        <pre id="ggufOutput">Output will appear here.</pre>
-
-        <p class="small">
-            This frontend does not rewrite GGUF tensors or metadata.
-            Binary editing requires a compatible GGUF backend.
-        </p>
+        <button class="btn primary" id="planTraining">Create workflow plan</button>
+        <div class="form-group"><label>Proposed plan</label><div class="output" id="planOutput">Your workflow will appear here.</div></div>
+        <button class="btn" id="downloadPlan">Download plan</button>
+      </div>
     </section>
 
-    <!-- PROBLEM FIXER -->
-    <section id="fixerSection" class="card section hidden">
-        <button class="secondary" data-home>← Dashboard</button>
-        <h2>Automatic Problem Fixer</h2>
-
-        <label for="problemInput">Describe the problem</label>
-        <textarea
-            id="problemInput"
-            placeholder="Describe the error, model behavior, logs, or training issue..."
-        ></textarea>
-
-        <label for="problemType">Problem category</label>
-        <select id="problemType">
-            <option>Model loading</option>
-            <option>GGUF compatibility</option>
-            <option>Android build</option>
-            <option>Fine-tuning failure</option>
-            <option>Model output quality</option>
-            <option>Memory exhaustion</option>
-        </select>
-
-        <button id="diagnoseProblem" class="primary full">
-            Prepare diagnostic report
-        </button>
-
-        <pre id="problemOutput">Diagnostic report will appear here.</pre>
+    <!-- MODEL MANAGER -->
+    <section class="page" id="page-model">
+      <div class="eyebrow">Model configuration</div>
+      <h1>Model <span class="gradient">Manager</span></h1>
+      <p>Configure a model URL or select a local file. Downloading weights does not automatically make the model runnable.</p>
+      <div class="card">
+        <div class="form-group">
+          <label for="modelName">Model name</label>
+          <input id="modelName" placeholder="My local model">
+        </div>
+        <div class="form-group">
+          <label for="modelUrl">Direct model download URL</label>
+          <input id="modelUrl" type="url" placeholder="https://example.com/model.gguf">
+        </div>
+        <div class="notice warning">
+          Large model downloads may fail because of browser CORS restrictions, server configuration, insufficient disk space, or memory limits. A URL must point directly to a downloadable file.
+        </div>
+        <button class="btn primary" id="downloadModel">Download model</button>
+        <button class="btn" id="cancelDownload">Cancel download</button>
+        <div class="progress-track"><div class="progress" id="downloadProgress"></div></div>
+        <div class="output" id="downloadStatus">No download started.</div>
+        <div class="form-group">
+          <label for="localModel">Or select a local model file</label>
+          <input type="file" id="localModel" accept=".gguf,.bin,.onnx,.safetensors,application/octet-stream">
+        </div>
+        <button class="btn" id="useLocalModel">Set selected file as configured model</button>
+        <div class="model-status">
+          <div><strong style="font-size:12px">Configured model</strong><div class="small" id="currentModel">None</div></div>
+          <span class="pill" id="modelState">Not loaded</span>
+        </div>
+        <div class="notice">
+          This standalone page stores configuration in browser storage. Large downloaded model files are not automatically persisted by this basic implementation. Use an app-native storage layer for reliable model persistence across updates.
+        </div>
+      </div>
     </section>
 
-    <!-- MANUAL FINE-TUNING -->
-    <section id="manualSection" class="card section hidden">
-        <button class="secondary" data-home>← Dashboard</button>
-        <h2>Manual Fine-Tuning</h2>
+    <!-- SETTINGS -->
+    <section class="page" id="page-settings">
+      <div class="eyebrow">Application preferences</div>
+      <h1>Settings</h1>
+      <p>Choose the memory budget that your intended inference runtime may use.</p>
 
-        <label for="baseModel">Base model</label>
-        <input id="baseModel" placeholder="e.g. organization/model-name">
+      <div class="card">
+        <h2>Memory budget</h2>
+        <p>Choose one of 16 options. This preference does not reserve RAM or measure available device memory.</p>
+        <div class="memory-grid" id="memoryGrid"></div>
+        <div class="notice" id="memoryExplanation">Selected budget: 4 GB.</div>
+        <button class="btn primary" id="saveSettings">Save settings</button>
+      </div>
 
-        <label for="dataset">Dataset location or description</label>
-        <textarea
-            id="dataset"
-            placeholder="Dataset path, source, or training-data description"
-        ></textarea>
-
-        <label for="trainingMethod">Training method</label>
-        <select id="trainingMethod">
-            <option value="lora">LoRA</option>
-            <option value="qlora">QLoRA</option>
-            <option value="full">Full fine-tuning</option>
-        </select>
-
-        <label for="epochs">Training epochs</label>
-        <input id="epochs" type="number" min="1" max="100" value="3">
-
-        <label for="learningRate">Learning rate</label>
-        <input
-            id="learningRate"
-            type="number"
-            min="0.000001"
-            max="1"
-            step="0.000001"
-            value="0.0002"
-        >
-
-        <button id="prepareTraining" class="primary full section">
-            Prepare training configuration
-        </button>
-
-        <pre id="trainingOutput">Training configuration will appear here.</pre>
-
-        <p class="small">
-            This generates a configuration only. Real fine-tuning requires
-            a training backend and compatible model weights. GGUF inference
-            files generally are not sufficient by themselves for training.
-        </p>
+      <div class="card" style="margin-top:15px">
+        <h2>Local data</h2>
+        <p>Chat history and settings are stored in this browser when local storage is available.</p>
+        <div class="row">
+          <button class="btn" id="exportData">Export chat history</button>
+          <button class="btn danger" id="resetData">Reset local settings and chat</button>
+        </div>
+      </div>
     </section>
 
-    <!-- AUTOMATIC FINE-TUNING -->
-    <section id="autoSection" class="card section hidden">
-        <button class="secondary" data-home>← Dashboard</button>
-        <h2>Automatic AI Builder</h2>
+  </div>
 
-        <label for="aiDescription">Describe the AI you want</label>
-        <textarea
-            id="aiDescription"
-            placeholder="What should this AI do? Who will use it? What skills should it have?"
-        ></textarea>
-
-        <label for="aiResearch">Research sources or requirements</label>
-        <textarea
-            id="aiResearch"
-            placeholder="Optional research sources, reference documents, or constraints"
-        ></textarea>
-
-        <label for="aiTarget">Target environment</label>
-        <select id="aiTarget">
-            <option>Android local AI</option>
-            <option>Cloud-hosted AI</option>
-            <option>Desktop AI</option>
-            <option>Research and training plan</option>
-        </select>
-
-        <button id="buildAiPlan" class="primary full section">
-            Generate AI development plan
-        </button>
-
-        <pre id="aiPlanOutput">Your development plan will appear here.</pre>
-
-        <p class="small">
-            Actual web research, model training, and model downloads require
-            connected services. This page does not perform those operations
-            automatically without a backend.
-        </p>
-    </section>
+  <footer style="border-top:1px solid var(--border);padding:17px;text-align:center;color:#7f89a8;font-size:10px">
+    NEXORA STUDIO · JAVASCRIPT EDITION
+  </footer>
 </main>
+</div>
 
-<footer>
-    Nexora Studio · Model files should persist independently of app updates.
-</footer>
+<div id="toast" class="toast hidden" role="status"></div>
 
 <script>
 "use strict";
 
-/*
- * Nexora Studio frontend.
- *
- * Native Android integration contract:
- *
- * window.NexoraNative.getModelStatus()
- * window.NexoraNative.chooseModelFolder()
- * window.NexoraNative.downloadModel(url)
- *
- * These methods must be implemented by the native Android WebView host.
- * A real implementation should use Android's persistent file storage or
- * Storage Access Framework, verify the model, and expose progress callbacks.
- */
+/* ==========================================================
+   NEXORA STUDIO
+   Standalone JavaScript functionality.
+   The built-in generator is NOT a trained language model.
+   ========================================================== */
 
 const $ = id => document.getElementById(id);
 
-const STORAGE_KEYS = {
-    memory: "nexora.memoryGB",
-    modelUrl: "nexora.modelUrl",
-    appId: "nexora.appId",
-    repo: "nexora.repo"
+const STORAGE = {
+  settings: "nexora.settings.v1",
+  messages: "nexora.messages.v1",
+  model: "nexora.model.v1"
 };
 
-const state = {
-    selectedMemory: Number(localStorage.getItem(STORAGE_KEYS.memory)) || null,
-    ggufFile: null
-};
-
-function setStatus(message) {
-    $("connectionStatus").textContent = message;
+function safeRead(key, fallback) {
+  try {
+    const value = localStorage.getItem(key);
+    return value === null ? fallback : JSON.parse(value);
+  } catch {
+    return fallback;
+  }
 }
 
-function showSection(sectionId) {
-    document.querySelectorAll("#dashboard, main > .section").forEach(section => {
-        section.classList.add("hidden");
+function safeWrite(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    showToast("Browser storage failed or is full.");
+    return false;
+  }
+}
+
+function showToast(message) {
+  const toast = $("toast");
+  toast.textContent = message;
+  toast.classList.remove("hidden");
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => toast.classList.add("hidden"), 3200);
+}
+
+let settings = safeRead(STORAGE.settings, { memoryGB: 4 });
+let chatHistory = safeRead(STORAGE.messages, []);
+let modelConfig = safeRead(STORAGE.model, { name: "", source: "", status: "Not loaded" });
+let activeDownload = null;
+
+if (!Array.isArray(chatHistory)) chatHistory = [];
+if (!settings || !Number.isInteger(settings.memoryGB)) settings = { memoryGB: 4 };
+if (!modelConfig || typeof modelConfig !== "object") {
+  modelConfig = { name: "", source: "", status: "Not loaded" };
+}
+
+/* Navigation */
+const pageNames = {
+  home: "Dashboard",
+  chat: "AI Assistant",
+  gguf: "GGUF Inspector",
+  fixer: "Code Diagnostics",
+  manual: "Training Configuration",
+  auto: "Auto Trainer Planner",
+  model: "Model Manager",
+  settings: "Settings"
+};
+
+function navigate(page) {
+  if (!pageNames[page]) page = "home";
+
+  document.querySelectorAll(".page").forEach(el => {
+    el.classList.toggle("active", el.id === "page-" + page);
+  });
+
+  document.querySelectorAll(".nav").forEach(el => {
+    el.classList.toggle("active", el.dataset.page === page);
+  });
+
+  $("topTitle").textContent = pageNames[page];
+  $("sidebar").classList.remove("open");
+
+  if (page === "chat") {
+    renderChat();
+    $("chatInput").focus();
+  }
+}
+
+document.querySelectorAll("[data-page]").forEach(button => {
+  button.addEventListener("click", () => navigate(button.dataset.page));
+});
+
+document.querySelectorAll("[data-go]").forEach(button => {
+  button.addEventListener("click", () => navigate(button.dataset.go));
+});
+
+$("menuBtn").addEventListener("click", () => $("sidebar").classList.toggle("open"));
+
+/* Settings */
+function renderMemoryOptions() {
+  const grid = $("memoryGrid");
+  grid.replaceChildren();
+
+  for (let gb = 1; gb <= 16; gb++) {
+    const label = document.createElement("label");
+    label.className = "mem";
+
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = "memoryGB";
+    radio.value = String(gb);
+    radio.checked = settings.memoryGB === gb;
+
+    const span = document.createElement("span");
+    span.textContent = gb + " GB";
+
+    radio.addEventListener("change", () => {
+      settings.memoryGB = gb;
+      $("memoryExplanation").textContent =
+        "Selected budget: " + gb + " GB. This is a preference, not a measurement of free RAM.";
+      updateDashboard();
     });
 
-    if (sectionId === "dashboard") {
-        $("dashboard").classList.remove("hidden");
-    } else {
-        $(sectionId).classList.remove("hidden");
-    }
+    label.append(radio, span);
+    grid.append(label);
+  }
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  $("memoryExplanation").textContent =
+    "Selected budget: " + settings.memoryGB + " GB.";
 }
 
-document.querySelectorAll("[data-open]").forEach(button => {
-    button.addEventListener("click", () => showSection(button.dataset.open));
+$("saveSettings").addEventListener("click", () => {
+  safeWrite(STORAGE.settings, settings);
+  updateDashboard();
+  showToast("Settings saved.");
 });
 
-document.querySelectorAll("[data-home]").forEach(button => {
-    button.addEventListener("click", () => showSection("dashboard"));
+$("exportData").addEventListener("click", () => {
+  downloadFile(
+    "nexora-chat-history.json",
+    JSON.stringify({ exportedAt: new Date().toISOString(), messages: chatHistory }, null, 2),
+    "application/json"
+  );
 });
 
-function renderMemoryOptions() {
-    const container = $("memoryChoices");
-    container.innerHTML = "";
+$("resetData").addEventListener("click", () => {
+  if (!confirm("Delete local chat history, model configuration, and settings?")) return;
 
-    for (let gb = 1; gb <= 16; gb++) {
-        const button = document.createElement("button");
-        button.className = "memory-option";
-        button.textContent = gb + " GB";
-        button.type = "button";
+  chatHistory = [];
+  settings = { memoryGB: 4 };
+  modelConfig = { name: "", source: "", status: "Not loaded" };
 
-        if (state.selectedMemory === gb) {
-            button.classList.add("selected");
-        }
+  safeWrite(STORAGE.messages, chatHistory);
+  safeWrite(STORAGE.settings, settings);
+  safeWrite(STORAGE.model, modelConfig);
 
-        button.addEventListener("click", () => {
-            state.selectedMemory = gb;
-            renderMemoryOptions();
+  renderMemoryOptions();
+  renderChat();
+  updateModelUI();
+  updateDashboard();
+  showToast("Local settings reset.");
+});
 
-            $("memoryWarning").textContent =
-                "Selected budget: " + gb + " GB. This setting is a target, " +
-                "not a guarantee that your device can allocate this much RAM.";
-        });
-
-        container.appendChild(button);
-    }
+/* Dashboard */
+function updateDashboard() {
+  $("memoryPill").textContent = "Memory: " + settings.memoryGB + " GB";
+  $("statMemory").textContent = settings.memoryGB + " GB";
+  $("statMessages").textContent = chatHistory.length;
+  $("statModel").textContent = modelConfig.name ? "Configured" : "None";
+  $("modelPill").textContent = modelConfig.name ? "Model configured" : "No model loaded";
 }
 
-$("saveMemory").addEventListener("click", () => {
-    if (!state.selectedMemory) {
-        $("memoryWarning").textContent = "Choose a memory budget first.";
-        return;
-    }
+function updateModelUI() {
+  $("currentModel").textContent = modelConfig.name || "None";
+  $("modelState").textContent = modelConfig.status || "Not loaded";
+  $("modelName").value = modelConfig.name || "";
+  $("modelUrl").value = modelConfig.source || "";
+  updateDashboard();
+}
 
-    localStorage.setItem(STORAGE_KEYS.memory, String(state.selectedMemory));
-    $("setupSection").classList.add("hidden");
+/* Chat history */
+function appendMessage(role, text, save = true) {
+  const message = {
+    role: role === "user" ? "user" : "assistant",
+    text: String(text).slice(0, 50000),
+    timestamp: Date.now()
+  };
 
-    $("modelStatus").textContent =
-        "Memory budget saved: " + state.selectedMemory +
-        " GB. Checking for the existing GGUF model...";
+  chatHistory.push(message);
 
-    checkModel();
+  if (chatHistory.length > 300) chatHistory = chatHistory.slice(-300);
+
+  if (save) safeWrite(STORAGE.messages, chatHistory);
+
+  renderChat();
+  updateDashboard();
+}
+
+function renderChat() {
+  const container = $("messages");
+  container.replaceChildren();
+
+  if (!chatHistory.length) {
+    const welcome = document.createElement("div");
+    welcome.className = "message assistant";
+
+    const label = document.createElement("span");
+    label.className = "message-label";
+    label.textContent = "NEXORA";
+
+    const body = document.createElement("div");
+    body.textContent =
+      "Nexora Studio is ready. The built-in JavaScript generator is experimental and is not a trained LLM. Ask about the available tools or configure a real model and inference runtime.";
+
+    welcome.append(label, body);
+    container.append(welcome);
+  }
+
+  for (const item of chatHistory) {
+    const bubble = document.createElement("div");
+    bubble.className = "message " + (item.role === "user" ? "user" : "assistant");
+
+    const label = document.createElement("span");
+    label.className = "message-label";
+    label.textContent = item.role === "user" ? "YOU" : "NEXORA";
+
+    const body = document.createElement("div");
+    body.textContent = item.text;
+
+    bubble.append(label, body);
+    container.append(bubble);
+  }
+
+  container.scrollTop = container.scrollHeight;
+}
+
+/* Experimental generator: deliberately transparent and not an LLM. */
+function experimentalGenerate(prompt) {
+  const text = prompt.trim();
+  const lower = text.toLowerCase();
+
+  if (!text) return "Enter a message first.";
+
+  if (/\b(hello|hi|hey|greetings)\b/.test(lower)) {
+    return "Hello. Nexora Studio's JavaScript interface is running. This built-in generator is experimental, not a pretrained language model.";
+  }
+
+  if (/\b(who are you|what are you)\b/.test(lower)) {
+    return "I am the experimental assistant inside Nexora Studio. This version uses basic JavaScript rules rather than a trained neural language model.";
+  }
+
+  if (/\b(memory|ram|gigabytes?)\b/.test(lower)) {
+    return "Your configured memory budget is " + settings.memoryGB +
+      " GB. This setting does not reserve physical RAM. Actual model memory use depends on its weights, context length, inference runtime, and device.";
+  }
+
+  if (/\b(model|gguf|weights|inference)\b/.test(lower)) {
+    return "A GGUF file contains model data, but a compatible inference engine must execute it. This HTML can inspect a few GGUF header fields; it does not implement full GGUF inference. A real model needs trained weights and a runtime.";
+  }
+
+  if (/\b(train|training|fine.?tun|dataset)\b/.test(lower)) {
+    return "Training requires a dataset, a training implementation, model weights, and sufficient compute. Nexora can export a draft configuration, but this standalone page does not train neural-network weights.";
+  }
+
+  if (/\b(javascript|html|code|programming|error|bug)\b/.test(lower)) {
+    return "I can run the basic code diagnostics in the Code Diagnostics tab. This experimental generator cannot reliably reason about arbitrary code like a trained coding model. Paste your code there for basic checks.";
+  }
+
+  if (/\b(download|install|save|storage)\b/.test(lower)) {
+    return "Use Model Manager to configure a direct download URL or select a local file. This basic page does not guarantee persistent storage of large downloaded weights. An Android app should use native persistent storage and a compatible inference runtime.";
+  }
+
+  if (/\b(help|features|tools|what can you do)\b/.test(lower)) {
+    return "Available tools: GGUF header inspection, basic code diagnostics, training configuration export, an auto-training workflow planner, memory-budget settings, and chat-history storage. Full model inference and actual training are not implemented in this standalone page.";
+  }
+
+  return "I received your message: \"" + text.slice(0, 350) + "\".\n\nThis built-in generator does not have trained language-model weights, so it cannot reliably answer arbitrary questions. Connect a pretrained model and inference runtime to enable genuine AI responses.";
+}
+
+$("sendBtn").addEventListener("click", sendMessage);
+
+$("chatInput").addEventListener("keydown", event => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    sendMessage();
+  }
 });
 
-function initializeSetup() {
-    renderMemoryOptions();
+function sendMessage() {
+  const input = $("chatInput");
+  const text = input.value.trim();
+  if (!text) return;
 
-    if (!state.selectedMemory) {
-        $("setupSection").classList.remove("hidden");
-    } else {
-        $("setupSection").classList.add("hidden");
-    }
+  input.value = "";
+  appendMessage("user", text);
 
-    $("modelUrl").value = localStorage.getItem(STORAGE_KEYS.modelUrl) || "";
-    $("repoUrl").value = localStorage.getItem(STORAGE_KEYS.repo) ||
-        "https://github.com/serajdevlops-ux/Nexora-studio";
-    $("appId").value = localStorage.getItem(STORAGE_KEYS.appId) ||
-        "com.nexora.studio";
+  $("sendBtn").disabled = true;
+  $("sendBtn").textContent = "…";
+
+  setTimeout(() => {
+    appendMessage("assistant", experimentalGenerate(text));
+    $("sendBtn").disabled = false;
+    $("sendBtn").textContent = "Send";
+    input.focus();
+  }, 150);
+}
+
+$("clearChat").addEventListener("click", () => {
+  if (!confirm("Clear the saved conversation?")) return;
+  chatHistory = [];
+  safeWrite(STORAGE.messages, chatHistory);
+  renderChat();
+  updateDashboard();
+});
+
+/* File download helper */
+function downloadFile(filename, content, mime = "text/plain") {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+/* GGUF basic header inspector */
+$("inspectBtn").addEventListener("click", async () => {
+  const file = $("ggufFile").files[0];
+
+  if (!file) {
+    $("ggufOutput").textContent = "Select a .gguf file first.";
+    return;
+  }
+
+  try {
+    const header = await file.slice(0, 1024 * 1024).arrayBuffer();
+    const view = new DataView(header);
+    const bytes = new Uint8Array(header);
+
+    if (bytes.length < 24) throw new Error("File is too small to contain a GGUF header.");
+
+    const magic = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]);
+    if (magic !== "GGUF") throw new Error("Invalid GGUF magic. The file does not appear to be GGUF.");
+
+    const version = view.getUint32(4, true);
+    const tensorCount = readUint64Safe(view, 8);
+    const metadataCount = readUint64Safe(view, 16);
+
+    $("ggufOutput").textContent =
+      "File: " + file.name + "\n" +
+      "Size: " + formatBytes(file.size) + "\n" +
+      "Magic: " + magic + "\n" +
+      "GGUF version: " + version + "\n" +
+      "Tensor count: " + tensorCount + "\n" +
+      "Metadata entries: " + metadataCount + "\n\n" +
+      "This is header inspection only. Metadata values and tensor contents were not fully parsed.";
+  } catch (error) {
+    $("ggufOutput").textContent = "Inspection error: " + error.message;
+  }
+});
+
+function readUint64Safe(view, offset) {
+  const value = view.getBigUint64(offset, true);
+  if (value > BigInt(Number.MAX_SAFE_INTEGER)) return value.toString();
+  return Number(value).toLocaleString("en-US");
 }
 
 function formatBytes(bytes) {
-    if (!Number.isFinite(bytes) || bytes < 0) return "Unknown";
-
-    const units = ["B", "KB", "MB", "GB", "TB"];
-    let value = bytes;
-    let unit = 0;
-
-    while (value >= 1024 && unit < units.length - 1) {
-        value /= 1024;
-        unit++;
-    }
-
-    return value.toFixed(unit === 0 ? 0 : 2) + " " + units[unit];
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let value = bytes;
+  let i = 0;
+  while (value >= 1024 && i < units.length - 1) {
+    value /= 1024;
+    i++;
+  }
+  return value.toFixed(i ? 2 : 0) + " " + units[i];
 }
 
-/*
- * Model status:
- * The browser frontend cannot directly inspect arbitrary Android folders.
- * It asks the native bridge when one exists.
- */
-async function checkModel() {
-    const status = $("modelStatus");
-    const downloadStatus = $("downloadStatus");
+/* Code diagnostics */
+$("analyzeBtn").addEventListener("click", () => {
+  const type = $("codeType").value;
+  const code = $("codeInput").value;
+  const results = [];
 
-    status.className = "notice";
-    status.textContent = "Checking for an existing model...";
+  if (!code.trim()) {
+    $("diagnostics").textContent = "Paste code or an error message first.";
+    return;
+  }
 
+  results.push("Input length: " + code.length + " characters.");
+  results.push("Selected type: " + type + ".");
+
+  if (type === "json") {
     try {
-        if (window.NexoraNative &&
-            typeof window.NexoraNative.getModelStatus === "function") {
-
-            const result = await window.NexoraNative.getModelStatus();
-
-            if (result && result.exists && result.valid) {
-                status.className = "notice success";
-                status.textContent =
-                    "Existing model found and verified. " +
-                    "The app should reuse this file instead of downloading it.";
-                downloadStatus.textContent =
-                    "Model ready: " + (result.path || "native model folder");
-                $("downloadProgress").style.width = "100%";
-                setStatus("Model ready");
-                return result;
-            }
-
-            status.textContent =
-                "No valid model found. Downloading is available when configured.";
-            $("downloadProgress").style.width = "0%";
-            setStatus("Model missing");
-            return result;
-        }
-
-        status.className = "notice warning";
-        status.textContent =
-            "Native folder access is not connected. The browser cannot " +
-            "check Documents/Nexora/AI directly. Add the Android bridge " +
-            "to enable persistent model detection.";
-
-        downloadStatus.textContent =
-            "Waiting for native Android storage integration.";
-
-        setStatus("Storage integration required");
-        return null;
-
+      JSON.parse(code);
+      results.push("PASS: Valid JSON.");
     } catch (error) {
-        status.className = "notice warning";
-        status.textContent = "Model check failed: " + error.message;
-        setStatus("Model check failed");
-        return null;
+      results.push("FAIL: " + error.message);
     }
+  } else if (type === "javascript") {
+    try {
+      new Function(code);
+      results.push("PASS: No syntax error detected by the browser parser.");
+      results.push("WARNING: This does not prove the code is safe or logically correct. The code was parsed but not executed.");
+    } catch (error) {
+      results.push("FAIL: " + error.name + ": " + error.message);
+    }
+  } else if (type === "html") {
+    const doc = new DOMParser().parseFromString(code, "text/html");
+    results.push("Parsed HTML document.");
+    results.push("Elements found: " + doc.body.querySelectorAll("*").length);
+    if (/<script\b/i.test(code)) {
+      results.push("Note: The HTML contains script elements. This diagnostic did not execute them.");
+    }
+  } else if (type === "yaml") {
+    const lines = code.split(/\r?\n/);
+    const tabs = lines.reduce((n, line) => n + (line.includes("\t") ? 1 : 0), 0);
+    results.push("Lines: " + lines.length);
+    results.push("Lines containing tabs: " + tabs);
+    results.push("Basic check only. A complete YAML parser is not included.");
+  } else {
+    results.push("Text captured. No language-specific parser was selected.");
+    results.push("Review the error message and check the associated file, line, and stack trace.");
+  }
+
+  $("diagnostics").textContent = results.join("\n");
+});
+
+/* Training configuration export */
+function getTrainingConfig() {
+  const epochs = Number($("epochs").value);
+  const batchSize = Number($("batchSize").value);
+  const learningRate = Number($("learningRate").value);
+
+  if (!Number.isInteger(epochs) || epochs < 1 || epochs > 100) {
+    throw new Error("Epochs must be an integer between 1 and 100.");
+  }
+
+  if (!Number.isInteger(batchSize) || batchSize < 1 || batchSize > 1024) {
+    throw new Error("Batch size must be an integer between 1 and 1024.");
+  }
+
+  if (!Number.isFinite(learningRate) || learningRate <= 0 || learningRate > 1) {
+    throw new Error("Learning rate must be greater than 0 and no more than 1.");
+  }
+
+  return {
+    base_model: $("trainModel").value.trim(),
+    dataset: $("datasetPath").value.trim(),
+    method: $("fineTuneMethod").value,
+    epochs,
+    batch_size: batchSize,
+    learning_rate: learningRate,
+    memory_budget_gb: settings.memoryGB,
+    note: "Configuration only. Execute with a compatible training framework."
+  };
 }
 
-$("checkModel").addEventListener("click", checkModel);
-
-$("modelUrl").addEventListener("change", () => {
-    localStorage.setItem(STORAGE_KEYS.modelUrl, $("modelUrl").value.trim());
+$("exportTraining").addEventListener("click", () => {
+  try {
+    const config = getTrainingConfig();
+    const json = JSON.stringify(config, null, 2);
+    $("trainingOutput").textContent = json;
+    downloadFile("nexora-training-config.json", json, "application/json");
+    showToast("Training configuration exported.");
+  } catch (error) {
+    $("trainingOutput").textContent = "Error: " + error.message;
+  }
 });
 
-$("repoUrl").addEventListener("change", () => {
-    localStorage.setItem(STORAGE_KEYS.repo, $("repoUrl").value.trim());
+/* Auto-training workflow planner */
+let latestPlan = "";
+
+$("planTraining").addEventListener("click", () => {
+  const goal = $("trainingGoal").value.trim();
+
+  if (!goal) {
+    $("planOutput").textContent = "Describe the AI you want to build first.";
+    return;
+  }
+
+  const dataset = $("trainingData").value;
+  const plan = {
+    goal,
+    dataset_status: dataset,
+    steps: [
+      "Define target capabilities and measurable evaluation tests.",
+      dataset === "none"
+        ? "Collect and validate a suitable dataset before training."
+        : dataset === "own"
+          ? "Audit your dataset for quality, duplication, privacy, and licensing."
+          : "Identify an appropriately licensed public dataset and verify its provenance.",
+      "Choose a compatible pretrained base model and inspect its license.",
+      "Select an inference runtime and verify hardware compatibility.",
+      "Choose an appropriate fine-tuning method, such as LoRA, if supported.",
+      "Split training and validation data and establish baseline metrics.",
+      "Train using an actual training framework; this HTML page does not run training.",
+      "Evaluate results, test safety and regressions, then export the model using a supported format."
+    ],
+    memory_budget_gb: settings.memoryGB,
+    generated_at: new Date().toISOString()
+  };
+
+  latestPlan = JSON.stringify(plan, null, 2);
+  $("planOutput").textContent = latestPlan;
 });
 
-$("appId").addEventListener("change", () => {
-    localStorage.setItem(STORAGE_KEYS.appId, $("appId").value.trim());
+$("downloadPlan").addEventListener("click", () => {
+  if (!latestPlan) {
+    showToast("Create a workflow plan first.");
+    return;
+  }
+  downloadFile("nexora-training-plan.json", latestPlan, "application/json");
 });
 
-/*
- * Download:
- * A native Android bridge is the preferred implementation for a large GGUF.
- * The fallback uses a browser download and does not guarantee that the file
- * will be placed in a persistent app-managed folder.
- */
+/* Model configuration and download */
+function saveModelConfig() {
+  safeWrite(STORAGE.model, modelConfig);
+  updateModelUI();
+}
+
+$("useLocalModel").addEventListener("click", () => {
+  const file = $("localModel").files[0];
+
+  if (!file) {
+    showToast("Select a model file first.");
+    return;
+  }
+
+  modelConfig = {
+    name: $("modelName").value.trim() || file.name,
+    source: "Local file selected: " + file.name,
+    sizeBytes: file.size,
+    status: "Selected; inference not connected"
+  };
+
+  saveModelConfig();
+  showToast("File configured. It is not running as an AI model.");
+});
+
 $("downloadModel").addEventListener("click", async () => {
-    const url = $("modelUrl").value.trim();
+  const url = $("modelUrl").value.trim();
+  const name = $("modelName").value.trim() || "Downloaded model";
 
-    if (!url) {
+  if (!url) {
+    showToast("Enter a direct download URL.");
+    return;
+  }
+
+  let parsed;
+  try {
+    parsed = new URL(url);
+    if (!["http:", "https:"].includes(parsed.protocol)) throw new Error();
+  } catch {
+    showToast("Enter a valid HTTP or HTTPS URL.");
+    return;
+  }
+
+  if (activeDownload) activeDownload.abortController.abort();
+
+  const abortController = new AbortController();
+  activeDownload = { abortController };
+
+  $("downloadProgress").style.width = "0%";
+  $("downloadStatus").textContent = "Starting download...";
+
+  try {
+    const response = await fetch(parsed.href, {
+      signal: abortController.signal
+    });
+
+    if (!response.ok) throw new Error("HTTP " + response.status);
+
+    const total = Number(response.headers.get("content-length")) || 0;
+    const reader = response.body?.getReader();
+
+    if (!reader) {
+      const blob = await response.blob();
+      finishModelDownload(blob, name, url);
+      return;
+    }
+
+    const chunks = [];
+    let received = 0;
+
+    while (true) {
+      const result = await reader.read();
+      if (result.done) break;
+
+      chunks.push(result.value);
+      received += result.value.length;
+
+      if (total > 0) {
+        const percent = Math.min(100, received / total * 100);
+        $("downloadProgress").style.width = percent.toFixed(1) + "%";
         $("downloadStatus").textContent =
-            "Enter a direct GGUF download URL first.";
-        return;
-    }
-
-    if (!/^https?:\/\//i.test(url)) {
+          "Downloaded " + formatBytes(received) + " of " + formatBytes(total);
+      } else {
         $("downloadStatus").textContent =
-            "Enter a valid HTTP or HTTPS download URL.";
-        return;
+          "Downloaded " + formatBytes(received) + ". Server did not provide file size.";
+      }
     }
 
-    localStorage.setItem(STORAGE_KEYS.modelUrl, url);
-
-    const button = $("downloadModel");
-    button.disabled = true;
-    $("downloadProgress").style.width = "0%";
-    $("downloadStatus").textContent = "Starting download...";
-
-    try {
-        if (window.NexoraNative &&
-            typeof window.NexoraNative.downloadModel === "function") {
-
-            /*
-             * Native code must:
-             * 1. Check for an existing valid model.
-             * 2. Reuse it if already present.
-             * 3. Download to a temporary file if missing.
-             * 4. Verify integrity.
-             * 5. Atomically rename it to model.gguf.
-             * 6. Keep model files during app updates.
-             */
-            const result = await window.NexoraNative.downloadModel(url);
-
-            if (result && result.success) {
-                $("downloadProgress").style.width = "100%";
-                $("downloadStatus").textContent =
-                    "Model is ready: " + (result.path || "native storage");
-                $("modelStatus").className = "notice success";
-                $("modelStatus").textContent =
-                    "The model is stored persistently and ready for reuse.";
-            } else {
-                throw new Error(result?.message || "Native download failed.");
-            }
-        } else {
-            $("downloadStatus").textContent =
-                "Native model storage is not connected. Opening a browser " +
-                "download instead; this will not guarantee persistent " +
-                "folder placement or reuse after an app update.";
-
-            const anchor = document.createElement("a");
-            anchor.href = url;
-            anchor.download = "model.gguf";
-            anchor.rel = "noopener";
-            document.body.appendChild(anchor);
-            anchor.click();
-            anchor.remove();
-        }
-    } catch (error) {
-        $("downloadStatus").textContent = "Download error: " + error.message;
-    } finally {
-        button.disabled = false;
+    const blob = new Blob(chunks);
+    finishModelDownload(blob, name, url);
+  } catch (error) {
+    if (error.name === "AbortError") {
+      $("downloadStatus").textContent = "Download cancelled.";
+    } else {
+      $("downloadStatus").textContent =
+        "Download failed: " + error.message +
+        "\nPossible causes include CORS restrictions, a blocked URL, or a network error.";
     }
+  } finally {
+    activeDownload = null;
+  }
 });
 
-$("chooseModelFolder").addEventListener("click", async () => {
-    try {
-        if (window.NexoraNative &&
-            typeof window.NexoraNative.chooseModelFolder === "function") {
-            const result = await window.NexoraNative.chooseModelFolder();
+function finishModelDownload(blob, name, url) {
+  $("downloadProgress").style.width = "100%";
 
-            $("downloadStatus").textContent =
-                result?.path
-                    ? "Selected folder: " + result.path
-                    : "Folder selection completed.";
-            await checkModel();
-            return;
-        }
+  const filename = name.replace(/[^a-z0-9._-]/gi, "_") || "model.bin";
+  const objectURL = URL.createObjectURL(blob);
 
-        if ("showDirectoryPicker" in window) {
-            const handle = await window.showDirectoryPicker({
-                mode: "readwrite"
-            });
+  const a = document.createElement("a");
+  a.href = objectURL;
+  a.download = filename;
+  document.body.append(a);
+  a.click();
+  a.remove();
 
-            $("downloadStatus").textContent =
-                "Folder selected: " + handle.name +
-                ". Browser permission and handle persistence vary. " +
-                "This is not the same as native Android integration.";
-        } else {
-            $("downloadStatus").textContent =
-                "Folder selection is not supported here. Implement the " +
-                "Android folder picker in the native WebView host.";
-        }
-    } catch (error) {
-        if (error.name !== "AbortError") {
-            $("downloadStatus").textContent =
-                "Folder selection failed: " + error.message;
-        }
-    }
-});
+  setTimeout(() => URL.revokeObjectURL(objectURL), 30000);
 
-/* GGUF file inspection */
-$("ggufFile").addEventListener("change", event => {
-    state.ggufFile = event.target.files?.[0] || null;
+  modelConfig = {
+    name,
+    source: url,
+    sizeBytes: blob.size,
+    status: "Downloaded; inference not connected"
+  };
 
-    if (!state.ggufFile) {
-        $("ggufInfo").textContent = "No model selected.";
-        return;
-    }
+  saveModelConfig();
 
-    $("ggufInfo").textContent =
-        "Name: " + state.ggufFile.name + "\n" +
-        "Size: " + formatBytes(state.ggufFile.size) + "\n" +
-        "MIME type: " + (state.ggufFile.type || "Unknown") + "\n" +
-        "Last modified: " +
-        new Date(state.ggufFile.lastModified).toLocaleString();
-});
+  $("downloadStatus").textContent =
+    "Download finished: " + formatBytes(blob.size) +
+    "\nThe file was offered to the browser for saving. Verify its location and availability before using it.";
 
-$("inspectGguf").addEventListener("click", async () => {
-    const file = state.ggufFile;
-
-    if (!file) {
-        $("ggufOutput").textContent = "Select a GGUF file first.";
-        return;
-    }
-
-    const task = $("ggufTask").value;
-    const buffer = await file.slice(0, 4).arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-    const magic = String.fromCharCode(...bytes);
-
-    const validHeader = magic === "GGUF";
-
-    const report = {
-        file: file.name,
-        sizeBytes: file.size,
-        size: formatBytes(file.size),
-        operation: task,
-        magicHeader: magic,
-        validGGUFMagic: validHeader,
-        note: validHeader
-            ? "The magic header matches GGUF. Full validation requires parsing the complete format."
-            : "The file does not begin with the GGUF magic header."
-    };
-
-    $("ggufOutput").textContent = JSON.stringify(report, null, 2);
-});
-
-/* Problem fixer: creates a diagnostic request, not a real AI diagnosis. */
-$("diagnoseProblem").addEventListener("click", () => {
-    const problem = $("problemInput").value.trim();
-    const category = $("problemType").value;
-
-    if (!problem) {
-        $("problemOutput").textContent = "Describe the problem first.";
-        return;
-    }
-
-    const report = {
-        category,
-        problem,
-        suggestedChecks: [
-            "Capture the complete error message and relevant logs.",
-            "Record the model format, quantization, and model source.",
-            "Check available RAM, storage space, and runtime compatibility.",
-            "For Android build errors, inspect the failing Gradle task.",
-            "Reproduce the issue with the smallest possible test case."
-        ],
-        limitation:
-            "This is a diagnostic checklist. Automated repair requires a connected AI backend."
-    };
-
-    $("problemOutput").textContent = JSON.stringify(report, null, 2);
-});
-
-/* Manual fine-tuning configuration */
-$("prepareTraining").addEventListener("click", () => {
-    const model = $("baseModel").value.trim();
-    const dataset = $("dataset").value.trim();
-    const epochs = Number($("epochs").value);
-    const learningRate = Number($("learningRate").value);
-
-    if (!model || !dataset) {
-        $("trainingOutput").textContent =
-            "Enter a base model and a dataset location or description.";
-        return;
-    }
-
-    if (!Number.isInteger(epochs) || epochs < 1 || epochs > 100) {
-        $("trainingOutput").textContent =
-            "Epochs must be an integer between 1 and 100.";
-        return;
-    }
-
-    if (!Number.isFinite(learningRate) ||
-        learningRate <= 0 ||
-        learningRate > 1) {
-        $("trainingOutput").textContent =
-            "Enter a valid learning rate greater than 0 and no more than 1.";
-        return;
-    }
-
-    const config = {
-        base_model: model,
-        dataset,
-        method: $("trainingMethod").value,
-        epochs,
-        learning_rate: learningRate,
-        output_format: "training checkpoint; convert/export to GGUF separately if required",
-        execution: "configuration only; training backend required"
-    };
-
-    $("trainingOutput").textContent = JSON.stringify(config, null, 2);
-});
-
-/* Automatic AI plan */
-$("buildAiPlan").addEventListener("click", () => {
-    const description = $("aiDescription").value.trim();
-    const research = $("aiResearch").value.trim();
-    const target = $("aiTarget").value;
-
-    if (!description) {
-        $("aiPlanOutput").textContent =
-            "Describe the AI you want to build first.";
-        return;
-    }
-
-    const plan = {
-        goal: description,
-        research_requirements: research || "No additional sources specified.",
-        target,
-        phases: [
-            {
-                phase: 1,
-                name: "Requirements",
-                tasks: [
-                    "Define capabilities and measurable success criteria.",
-                    "Identify safety, licensing, and data requirements."
-                ]
-            },
-            {
-                phase: 2,
-                name: "Model selection",
-                tasks: [
-                    "Compare compatible base models.",
-                    "Verify licenses, context limits, quantization, and hardware needs."
-                ]
-            },
-            {
-                phase: 3,
-                name: "Data and training",
-                tasks: [
-                    "Prepare and validate the dataset.",
-                    "Select fine-tuning or retrieval-augmented generation as appropriate.",
-                    "Evaluate quality before deployment."
-                ]
-            },
-            {
-                phase: 4,
-                name: "Deployment",
-                tasks: [
-                    "Configure the runtime.",
-                    "Test memory consumption and response latency.",
-                    "Package the app separately from large model files."
-                ]
-            }
-        ],
-        execution_note:
-            "This is a plan only. Web research, training, and inference need connected services."
-    };
-
-    $("aiPlanOutput").textContent = JSON.stringify(plan, null, 2);
-});
-
-/* Startup */
-initializeSetup();
-
-if (state.selectedMemory) {
-    $("modelStatus").textContent =
-        "Saved memory budget: " + state.selectedMemory +
-        " GB. Checking model storage support...";
+  showToast("Download finished. Verify the saved file.");
 }
 
-checkModel();
-</script>
+$("cancelDownload").addEventListener("click", () => {
+  if (activeDownload) {
+    activeDownload.abortController.abort();
+  } else {
+    showToast("No active download.");
+  }
+});
 
+/* Initial startup */
+renderMemoryOptions();
+renderChat();
+updateModelUI();
+updateDashboard();
+
+if (!chatHistory.length) {
+  $("chatStatus").textContent = "Experimental JavaScript generator";
+}
+
+</script>
 </body>
 </html>
