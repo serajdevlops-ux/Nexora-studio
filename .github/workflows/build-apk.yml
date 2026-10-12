@@ -12,42 +12,86 @@ permissions:
 
 jobs:
   build:
+    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: |
-            platform-tools
-            platforms;android-35
-            build-tools;35.0.0
+      # Do not use android-actions/setup-android here.
+      # The previous failures occurred because that action attempted
+      # to install an invalid SDK package configuration.
+
+      - name: Locate Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "ANDROID_HOME=${ANDROID_HOME:-$ANDROID_SDK_ROOT}" >> "$GITHUB_ENV"
+
+          SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+
+          if [ -z "$SDK" ]; then
+            echo "::error::Android SDK was not configured on the runner."
+            exit 1
+          fi
+
+          echo "Android SDK: $SDK"
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "$SDK/platform-tools" >> "$GITHUB_PATH"
+          echo "$SDK/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+
+          if [ ! -d "$SDK/cmdline-tools" ]; then
+            echo "::error::Android command-line tools directory not found."
+            exit 1
+          fi
 
       - name: Install Android SDK packages
+        shell: bash
         run: |
-          set -e
-          sdkmanager --licenses
-          sdkmanager \
+          set -euo pipefail
+
+          SDK="${ANDROID_HOME}"
+          SDKMANAGER="$(find "$SDK/cmdline-tools" -type f -name sdkmanager | head -n 1)"
+
+          if [ -z "$SDKMANAGER" ]; then
+            echo "::error::sdkmanager was not found."
+            exit 1
+          fi
+
+          echo "Using: $SDKMANAGER"
+
+          yes | "$SDKMANAGER" --sdk_root="$SDK" --licenses >/dev/null || true
+
+          "$SDKMANAGER" --sdk_root="$SDK" \
             "platform-tools" \
             "platforms;android-35" \
             "build-tools;35.0.0"
 
-      - name: Verify project files
+      - name: Verify source HTML
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
+
           if [ ! -f index.html ]; then
-            echo "::error::index.html was not found in the repository root."
+            echo "::error::index.html must exist in the repository root."
             exit 1
           fi
+
+          if [ ! -s index.html ]; then
+            echo "::error::index.html is empty."
+            exit 1
+          fi
+
+          echo "Found root index.html."
+          wc -c index.html
 
       - name: Generate Android project
         shell: bash
@@ -89,6 +133,7 @@ jobs:
           cat > gradle.properties <<'EOF'
           android.useAndroidX=true
           org.gradle.jvmargs=-Xmx3g -Dfile.encoding=UTF-8
+          org.gradle.parallel=true
           EOF
 
           cat > app/build.gradle <<'EOF'
@@ -112,6 +157,11 @@ jobs:
                   debug {
                       debuggable true
                   }
+              }
+
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
               }
           }
           EOF
@@ -163,7 +213,7 @@ jobs:
 
           public class MainActivity extends Activity {
               private WebView webView;
-              private boolean permissionScreenOpened = false;
+              private boolean permissionRequestInProgress = false;
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
@@ -198,25 +248,31 @@ jobs:
                       return;
                   }
 
-                  if (permissionScreenOpened) {
+                  if (permissionRequestInProgress) {
                       return;
                   }
 
-                  permissionScreenOpened = true;
+                  permissionRequestInProgress = true;
 
                   try {
                       Intent intent = new Intent(
                           Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
                           Uri.parse("package:" + getPackageName())
                       );
+
                       startActivity(intent);
+
                   } catch (Exception exception) {
                       try {
                           Intent intent = new Intent(
                               Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
                           );
+
                           startActivity(intent);
+
                       } catch (Exception secondException) {
+                          permissionRequestInProgress = false;
+
                           Toast.makeText(
                               this,
                               "Unable to open file access settings.",
@@ -229,6 +285,8 @@ jobs:
               @Override
               protected void onResume() {
                   super.onResume();
+
+                  permissionRequestInProgress = false;
 
                   if (webView != null) {
                       webView.postDelayed(() -> {
@@ -243,28 +301,26 @@ jobs:
 
               private void dispatchPermissionState(boolean granted) {
                   if (webView != null) {
-                      String script =
+                      webView.evaluateJavascript(
                           "window.dispatchEvent(new CustomEvent(" +
                           "'nexora-file-access',{detail:{granted:" +
-                          granted + "}}));";
-
-                      webView.evaluateJavascript(script, null);
+                          granted + "}}));",
+                          null
+                      );
                   }
               }
 
               private class NexoraBridge {
                   @JavascriptInterface
                   public boolean hasAllFilesAccess() {
-                      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                          return Environment.isExternalStorageManager();
-                      }
-                      return true;
+                      return Build.VERSION.SDK_INT < Build.VERSION_CODES.R
+                          || Environment.isExternalStorageManager();
                   }
 
                   @JavascriptInterface
                   public void requestAllFilesAccess() {
                       runOnUiThread(() -> {
-                          permissionScreenOpened = false;
+                          permissionRequestInProgress = false;
                           MainActivity.this.requestAllFilesAccess();
                       });
                   }
@@ -297,22 +353,27 @@ jobs:
         with:
           gradle-version: "8.9"
 
-      - name: Build debug APK
-        run: gradle --no-daemon --stacktrace assembleDebug
-
-      - name: Verify APK exists
+      - name: Build APK
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
+          gradle --no-daemon --stacktrace assembleDebug
+
+      - name: Verify APK
+        shell: bash
+        run: |
+          set -euo pipefail
+
           APK="app/build/outputs/apk/debug/app-debug.apk"
 
-          if [ ! -f "$APK" ]; then
-            echo "::error::APK build did not produce $APK"
+          if [ ! -s "$APK" ]; then
+            echo "::error::APK was not generated."
             exit 1
           fi
 
           ls -lh "$APK"
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: nexora-studio-apk
