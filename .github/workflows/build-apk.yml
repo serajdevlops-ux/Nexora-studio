@@ -2,10 +2,7 @@ name: Build Nexora Studio APK
 
 on:
   workflow_dispatch:
-
   push:
-    branches:
-      - main
     paths:
       - "index.html"
       - ".github/workflows/build-apk.yml"
@@ -15,110 +12,40 @@ permissions:
 
 jobs:
   build:
-    name: Build Nexora Studio Android APK
     runs-on: ubuntu-latest
 
-    env:
-      ANDROID_HOME: /usr/local/lib/android/sdk
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-
     steps:
-      # ==========================================
-      # 1. CHECK OUT REPOSITORY
-      # ==========================================
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ==========================================
-      # 2. INSTALL JAVA
-      # ==========================================
       - name: Set up Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      # ==========================================
-      # 3. CONFIGURE ANDROID SDK
-      # Do not use setup-android@v3.
-      # It attempts to install the obsolete "tools"
-      # package and fails on current SDK repositories.
-      # ==========================================
-      - name: Configure Android SDK
-        shell: bash
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
         run: |
-          set -euo pipefail
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
-          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-
-          if [ ! -x "$SDKMANAGER" ]; then
-            SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" \
-              -type f -name sdkmanager 2>/dev/null | head -n 1)"
-          fi
-
-          if [ -z "${SDKMANAGER:-}" ] || [ ! -x "$SDKMANAGER" ]; then
-            echo "::error::Android SDK sdkmanager was not found."
-            exit 1
-          fi
-
-          echo "Using SDK manager: $SDKMANAGER"
-
-          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
-
-          echo "$(dirname "$SDKMANAGER")" >> "$GITHUB_PATH"
-
-          yes | "$SDKMANAGER" --licenses >/dev/null || true
-
-          "$SDKMANAGER" \
-            "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
-
-      # ==========================================
-      # 4. INSTALL SVG CONVERTER
-      # ==========================================
-      - name: Install SVG tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y librsvg2-bin
-
-      # ==========================================
-      # 5. CHECK APPLICATION SOURCE
-      # ==========================================
-      - name: Check application source
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if [ ! -f index.html ]; then
-            echo "::error::index.html is missing from the repository root."
-            exit 1
-          fi
-
-          echo "Found Nexora Studio source."
-          ls -lh index.html
-
-      # ==========================================
-      # 6. CREATE ANDROID PROJECT
-      # ==========================================
       - name: Generate Android project
         shell: bash
         run: |
           set -euo pipefail
 
+          test -f index.html || {
+            echo "ERROR: Root index.html not found."
+            exit 1
+          }
+
           mkdir -p app/src/main/assets
           mkdir -p app/src/main/java/com/nexora/studio
-          mkdir -p app/src/main/res/values
-          mkdir -p app/src/main/res/drawable
-
-          for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
-            mkdir -p "app/src/main/res/mipmap-$density"
-          done
 
           cp index.html app/src/main/assets/index.html
 
-          # Gradle project settings.
           cat > settings.gradle <<'EOF'
           pluginManagement {
               repositories {
@@ -127,7 +54,6 @@ jobs:
                   gradlePluginPortal()
               }
           }
-
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
               repositories {
@@ -135,19 +61,21 @@ jobs:
                   mavenCentral()
               }
           }
-
           rootProject.name = "NexoraStudio"
           include(":app")
           EOF
 
-          # Root build configuration.
           cat > build.gradle <<'EOF'
           plugins {
               id 'com.android.application' version '8.7.3' apply false
           }
           EOF
 
-          # Android application configuration.
+          cat > gradle.properties <<'EOF'
+          android.useAndroidX=true
+          org.gradle.jvmargs=-Xmx3g -Dfile.encoding=UTF-8
+          EOF
+
           cat > app/build.gradle <<'EOF'
           plugins {
               id 'com.android.application'
@@ -160,37 +88,27 @@ jobs:
               defaultConfig {
                   applicationId 'com.nexora.studio'
                   minSdk 23
-                  targetSdk 28
+                  targetSdk 30
                   versionCode 1
                   versionName '1.0'
-              }
-
-              compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
               }
           }
           EOF
 
-          # Android manifest.
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-              <uses-permission android:name="android.permission.INTERNET" />
+              <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
               <application
-                  android:allowBackup="true"
                   android:label="Nexora Studio"
-                  android:icon="@mipmap/ic_launcher"
-                  android:roundIcon="@mipmap/ic_launcher"
-                  android:usesCleartextTraffic="false"
-                  android:theme="@android:style/Theme.Material.Light.NoActionBar">
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
+                  android:usesCleartextTraffic="false">
 
                   <activity
                       android:name=".MainActivity"
-                      android:exported="true"
-                      android:configChanges="orientation|screenSize|keyboardHidden">
+                      android:exported="true">
 
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
@@ -198,43 +116,27 @@ jobs:
                       </intent-filter>
 
                   </activity>
-
               </application>
           </manifest>
           EOF
-
-          # App name.
-          cat > app/src/main/res/values/strings.xml <<'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <resources>
-              <string name="app_name">Nexora Studio</string>
-          </resources>
-          EOF
-
-          echo "Android project generated successfully."
-
-      # ==========================================
-      # 7. CREATE WEBVIEW ACTIVITY
-      # ==========================================
-      - name: Create Android WebView
-        shell: bash
-        run: |
-          set -euo pipefail
 
           cat > app/src/main/java/com/nexora/studio/MainActivity.java <<'EOF'
           package com.nexora.studio;
 
           import android.app.Activity;
+          import android.content.Intent;
+          import android.net.Uri;
+          import android.os.Build;
           import android.os.Bundle;
-          import android.view.ViewGroup;
+          import android.os.Environment;
+          import android.provider.Settings;
           import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
-          import android.graphics.Color;
+          import android.widget.Toast;
 
           public class MainActivity extends Activity {
-
               private WebView webView;
 
               @Override
@@ -242,16 +144,6 @@ jobs:
                   super.onCreate(savedInstanceState);
 
                   webView = new WebView(this);
-
-                  webView.setLayoutParams(
-                      new ViewGroup.LayoutParams(
-                          ViewGroup.LayoutParams.MATCH_PARENT,
-                          ViewGroup.LayoutParams.MATCH_PARENT
-                      )
-                  );
-
-                  webView.setBackgroundColor(Color.rgb(10, 12, 20));
-
                   WebSettings settings = webView.getSettings();
                   settings.setJavaScriptEnabled(true);
                   settings.setDomStorageEnabled(true);
@@ -260,22 +152,60 @@ jobs:
 
                   webView.setWebViewClient(new WebViewClient());
                   webView.setWebChromeClient(new WebChromeClient());
-
                   setContentView(webView);
+                  webView.loadUrl("file:///android_asset/index.html");
 
-                  if (savedInstanceState != null) {
-                      webView.restoreState(savedInstanceState);
+                  webView.postDelayed(this::requestAllFilesAccess, 700);
+              }
+
+              private void requestAllFilesAccess() {
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                      if (Environment.isExternalStorageManager()) {
+                          notifyPage(true);
+                          return;
+                      }
+
+                      try {
+                          Intent intent = new Intent(
+                              Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                              Uri.parse("package:" + getPackageName())
+                          );
+                          startActivity(intent);
+                      } catch (Exception e) {
+                          Intent intent = new Intent(
+                              Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+                          );
+                          startActivity(intent);
+                      }
                   } else {
-                      webView.loadUrl("file:///android_asset/index.html");
+                      notifyPage(true);
                   }
               }
 
               @Override
-              protected void onSaveInstanceState(Bundle outState) {
-                  super.onSaveInstanceState(outState);
+              protected void onResume() {
+                  super.onResume();
 
                   if (webView != null) {
-                      webView.saveState(outState);
+                      webView.postDelayed(() -> {
+                          boolean granted = Build.VERSION.SDK_INT < Build.VERSION_CODES.R
+                              || Environment.isExternalStorageManager();
+                          notifyPage(granted);
+                      }, 300);
+                  }
+              }
+
+              private void notifyPage(boolean granted) {
+                  if (webView != null) {
+                      webView.evaluateJavascript(
+                          "window.dispatchEvent(new CustomEvent('nexora-file-access', {detail: {granted: "
+                              + granted + "}}));",
+                          null
+                      );
+                  }
+
+                  if (granted) {
+                      Toast.makeText(this, "File access enabled", Toast.LENGTH_SHORT).show();
                   }
               }
 
@@ -294,146 +224,22 @@ jobs:
                       webView.destroy();
                       webView = null;
                   }
-
                   super.onDestroy();
               }
           }
           EOF
 
-      # ==========================================
-      # 8. INSTALL GRADLE
-      # ==========================================
       - name: Install Gradle
-        shell: bash
-        run: |
-          set -euo pipefail
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
 
-          GRADLE_VERSION="8.9"
+      - name: Build debug APK
+        run: gradle --no-daemon assembleDebug
 
-          curl -fL --retry 3 \
-            "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
-            -o /tmp/gradle.zip
-
-          unzip -q /tmp/gradle.zip -d /tmp
-
-          echo "/tmp/gradle-${GRADLE_VERSION}/bin" >> "$GITHUB_PATH"
-
-          /tmp/gradle-${GRADLE_VERSION}/bin/gradle --version
-
-      # ==========================================
-      # 9. EXTRACT SVG FROM HTML
-      # ==========================================
-      - name: Extract Nexora SVG
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          python3 - <<'PY'
-          import re
-          from pathlib import Path
-
-          html = Path("index.html").read_text(encoding="utf-8")
-
-          pattern = (
-              r'<svg\b'
-              r'(?=[^>]*\bid\s*=\s*["\']app-icon["\'])'
-              r'[^>]*>.*?</svg\s*>'
-          )
-
-          match = re.search(
-              pattern,
-              html,
-              re.IGNORECASE | re.DOTALL
-          )
-
-          if match:
-              svg = match.group(0)
-              print("Found the embedded Nexora SVG icon.")
-          else:
-              print("No id=app-icon SVG found; using fallback icon.")
-
-              svg = """<svg xmlns="http://www.w3.org/2000/svg"
-                  width="512" height="512" viewBox="0 0 512 512">
-                  <rect width="512" height="512" rx="112" fill="#0b1020"/>
-                  <path d="M130 370 V142 L382 370 V142"
-                    fill="none" stroke="#55e6ff" stroke-width="38"
-                    stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M174 142 H338"
-                    fill="none" stroke="#a78bfa" stroke-width="24"
-                    stroke-linecap="round"/>
-              </svg>"""
-
-          Path("/tmp/nexora-icon.svg").write_text(
-              svg,
-              encoding="utf-8"
-          )
-          PY
-
-      # ==========================================
-      # 10. GENERATE LAUNCHER ICONS
-      # ==========================================
-      - name: Generate launcher icons
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          rsvg-convert -w 48 -h 48 \
-            /tmp/nexora-icon.svg \
-            -o app/src/main/res/mipmap-mdpi/ic_launcher.png
-
-          rsvg-convert -w 72 -h 72 \
-            /tmp/nexora-icon.svg \
-            -o app/src/main/res/mipmap-hdpi/ic_launcher.png
-
-          rsvg-convert -w 96 -h 96 \
-            /tmp/nexora-icon.svg \
-            -o app/src/main/res/mipmap-xhdpi/ic_launcher.png
-
-          rsvg-convert -w 144 -h 144 \
-            /tmp/nexora-icon.svg \
-            -o app/src/main/res/mipmap-xxhdpi/ic_launcher.png
-
-          rsvg-convert -w 192 -h 192 \
-            /tmp/nexora-icon.svg \
-            -o app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
-
-          echo "Launcher icons generated."
-
-      # ==========================================
-      # 11. BUILD APK
-      # ==========================================
-      - name: Build Nexora Studio APK
-        shell: bash
-        run: |
-          set -euo pipefail
-          gradle --no-daemon --stacktrace assembleDebug
-
-      # ==========================================
-      # 12. VERIFY APK
-      # ==========================================
-      - name: Verify APK
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          APK="app/build/outputs/apk/debug/app-debug.apk"
-
-          if [ ! -f "$APK" ]; then
-            echo "::error::APK was not generated."
-            find app/build/outputs -type f 2>/dev/null || true
-            exit 1
-          fi
-
-          echo "APK built successfully."
-          ls -lh "$APK"
-
-      # ==========================================
-      # 13. UPLOAD APK
-      # ==========================================
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Nexora-Studio-APK
+          name: nexora-studio-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
-          retention-days: 14
