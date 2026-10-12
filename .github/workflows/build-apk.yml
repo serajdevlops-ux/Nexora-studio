@@ -2,12 +2,12 @@ name: Build Nexora Studio APK
 
 on:
   workflow_dispatch:
+
   push:
     branches:
       - main
     paths:
       - "index.html"
-      - "app/**"
       - ".github/workflows/build-apk.yml"
 
 permissions:
@@ -15,152 +15,387 @@ permissions:
 
 jobs:
   build:
-    name: Build Android APK
+    name: Build Nexora Studio Android APK
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Download repository
+      # ==========================================
+      # 1. DOWNLOAD THE REPOSITORY
+      # ==========================================
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Set up Java
+      # ==========================================
+      # 2. INSTALL JAVA
+      # No Gradle cache: the project is generated.
+      # ==========================================
       - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
-          cache: gradle
 
-      # 3. Set up Android SDK
+      # ==========================================
+      # 3. INSTALL ANDROID SDK
+      # ==========================================
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      # 4. Install SVG conversion utility
+      - name: Install Android SDK components
+        run: |
+          sdkmanager "platforms;android-35" \
+                     "build-tools;35.0.0"
+
+      # ==========================================
+      # 4. INSTALL SVG CONVERTER
+      # ==========================================
       - name: Install SVG tools
         run: |
           sudo apt-get update
           sudo apt-get install -y librsvg2-bin
 
-      # 5. Verify Android project exists
-      - name: Verify project files
+      # ==========================================
+      # 5. CHECK HTML
+      # ==========================================
+      - name: Check application source
         run: |
-          if [ ! -f "index.html" ]; then
-            echo "ERROR: index.html was not found in the repository root."
+          if [ ! -f index.html ]; then
+            echo "::error::index.html is missing from the repository root."
             exit 1
           fi
 
-          if [ ! -f "app/src/main/AndroidManifest.xml" ]; then
-            echo "ERROR: AndroidManifest.xml was not found."
-            echo "Expected: app/src/main/AndroidManifest.xml"
-            exit 1
-          fi
+          echo "Found Nexora Studio index.html."
+          ls -lh index.html
 
-          if [ ! -f "gradlew" ]; then
-            echo "ERROR: Gradle wrapper gradlew was not found."
-            exit 1
-          fi
-
-      # 6. Copy the HTML application into Android assets
-      - name: Prepare HTML assets
+      # ==========================================
+      # 6. CREATE ANDROID PROJECT
+      # ==========================================
+      - name: Generate Android project
+        shell: bash
         run: |
+          set -euo pipefail
+
           mkdir -p app/src/main/assets
+          mkdir -p app/src/main/java/com/nexora/studio
+          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/mipmap-mdpi
+          mkdir -p app/src/main/res/mipmap-hdpi
+          mkdir -p app/src/main/res/mipmap-xhdpi
+          mkdir -p app/src/main/res/mipmap-xxhdpi
+          mkdir -p app/src/main/res/mipmap-xxxhdpi
+          mkdir -p app/src/main/res/drawable
+
           cp index.html app/src/main/assets/index.html
 
-      # 7. Extract SVG icon embedded in index.html
-      - name: Extract embedded SVG icon
+          # Create Gradle settings.
+          cat > settings.gradle <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+
+          rootProject.name = "NexoraStudio"
+          include(":app")
+          EOF
+
+          # Create the root Gradle build file.
+          cat > build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.7.3' apply false
+          }
+          EOF
+
+          # Create the Android application configuration.
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'com.nexora.studio'
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId 'com.nexora.studio'
+                  minSdk 23
+                  targetSdk 28
+                  versionCode 1
+                  versionName '1.0'
+              }
+
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+          }
+          EOF
+
+          # Create the Android manifest.
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+              <uses-permission android:name="android.permission.INTERNET" />
+
+              <application
+                  android:allowBackup="true"
+                  android:label="Nexora Studio"
+                  android:icon="@mipmap/ic_launcher"
+                  android:roundIcon="@mipmap/ic_launcher"
+                  android:usesCleartextTraffic="false"
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar">
+
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:configChanges="orientation|screenSize|keyboardHidden">
+
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+
+                  </activity>
+
+              </application>
+          </manifest>
+          EOF
+
+          # Create the Android WebView activity.
+          cat > app/src/main/java/com/nexora/studio/MainActivity.java <<'EOF'
+          package com.nexora.studio;
+
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import android.webkit.WebSettings;
+          import android.view.ViewGroup;
+          import android.graphics.Color;
+
+          public class MainActivity extends Activity {
+
+              private WebView webView;
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+
+                  webView = new WebView(this);
+                  webView.setLayoutParams(
+                      new ViewGroup.LayoutParams(
+                          ViewGroup.LayoutParams.MATCH_PARENT,
+                          ViewGroup.LayoutParams.MATCH_PARENT
+                      )
+                  );
+
+                  webView.setBackgroundColor(Color.rgb(10, 12, 20));
+
+                  WebSettings settings = webView.getSettings();
+                  settings.setJavaScriptEnabled(true);
+                  settings.setDomStorageEnabled(true);
+                  settings.setAllowFileAccess(true);
+                  settings.setAllowContentAccess(true);
+
+                  webView.setWebViewClient(new WebViewClient());
+                  webView.setWebChromeClient(new WebChromeClient());
+
+                  setContentView(webView);
+
+                  if (savedInstanceState != null) {
+                      webView.restoreState(savedInstanceState);
+                  } else {
+                      webView.loadUrl(
+                          "file:///android_asset/index.html"
+                      );
+                  }
+              }
+
+              @Override
+              protected void onSaveInstanceState(Bundle outState) {
+                  super.onSaveInstanceState(outState);
+
+                  if (webView != null) {
+                      webView.saveState(outState);
+                  }
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (webView != null && webView.canGoBack()) {
+                      webView.goBack();
+                  } else {
+                      super.onBackPressed();
+                  }
+              }
+
+              @Override
+              protected void onDestroy() {
+                  if (webView != null) {
+                      webView.destroy();
+                      webView = null;
+                  }
+
+                  super.onDestroy();
+              }
+          }
+          EOF
+
+          # Generate the values resource.
+          cat > app/src/main/res/values/strings.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string name="app_name">Nexora Studio</string>
+          </resources>
+          EOF
+
+          echo "Android project generated."
+
+      # ==========================================
+      # 7. INSTALL GRADLE DIRECTLY
+      # No gradlew file is required in the repo.
+      # ==========================================
+      - name: Install Gradle
         run: |
+          set -euo pipefail
+
+          GRADLE_VERSION="8.9"
+
+          curl -fL --retry 3 \
+            "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
+            -o /tmp/gradle.zip
+
+          unzip -q /tmp/gradle.zip -d /tmp
+
+          echo "/tmp/gradle-${GRADLE_VERSION}/bin" >> "$GITHUB_PATH"
+
+          /tmp/gradle-${GRADLE_VERSION}/bin/gradle --version
+
+      # ==========================================
+      # 8. EXTRACT SVG FROM INDEX.HTML
+      # ==========================================
+      - name: Extract Nexora SVG icon
+        shell: bash
+        run: |
+          set -euo pipefail
+
           python3 - <<'PY'
           import re
           from pathlib import Path
 
           html = Path("index.html").read_text(encoding="utf-8")
 
-          # Find the SVG whose opening tag contains id="app-icon".
+          # Match an inline SVG marked id="app-icon".
+          pattern = (
+              r'<svg\b'
+              r'(?=[^>]*\bid\s*=\s*["\']app-icon["\'])'
+              r'[^>]*>.*?</svg\s*>'
+          )
+
           match = re.search(
-              r'<svg\b(?=[^>]*\bid\s*=\s*["\']app-icon["\'])[^>]*>.*?</svg\s*>',
+              pattern,
               html,
               re.IGNORECASE | re.DOTALL
           )
 
-          if not match:
-              raise SystemExit(
-                  "ERROR: Could not find the app icon SVG.\n"
-                  'Add id="app-icon" to the opening <svg> tag in index.html.'
+          if match:
+              svg = match.group(0)
+              print("Found the embedded Nexora SVG.")
+          else:
+              # Use a fallback icon instead of failing the build.
+              print(
+                  'SVG id="app-icon" not found; '
+                  'generating a fallback Nexora icon.'
               )
 
-          svg = match.group(0)
+              svg = """<svg xmlns="http://www.w3.org/2000/svg"
+                  width="512" height="512" viewBox="0 0 512 512">
+                  <rect width="512" height="512" rx="112" fill="#0b1020"/>
+                  <path d="M130 370 V142 L382 370 V142"
+                      fill="none" stroke="#55e6ff"
+                      stroke-width="38" stroke-linecap="round"
+                      stroke-linejoin="round"/>
+                  <path d="M174 142 H338"
+                      fill="none" stroke="#a78bfa"
+                      stroke-width="24" stroke-linecap="round"/>
+              </svg>"""
 
           Path("/tmp/nexora-icon.svg").write_text(
               svg,
               encoding="utf-8"
           )
-
-          print("SVG launcher icon extracted successfully.")
           PY
 
-      # 8. Generate Android launcher icons
-      - name: Generate launcher icon PNGs
+      # ==========================================
+      # 9. GENERATE ANDROID LAUNCHER ICONS
+      # ==========================================
+      - name: Generate launcher icons
         run: |
-          mkdir -p app/src/main/res/mipmap-mdpi
-          mkdir -p app/src/main/res/mipmap-hdpi
-          mkdir -p app/src/main/res/mipmap-xhdpi
-          mkdir -p app/src/main/res/mipmap-xxhdpi
-          mkdir -p app/src/main/res/mipmap-xxxhdpi
+          set -euo pipefail
 
-          rsvg-convert \
-            -w 48 -h 48 \
+          rsvg-convert -w 48 -h 48 \
             /tmp/nexora-icon.svg \
             -o app/src/main/res/mipmap-mdpi/ic_launcher.png
 
-          rsvg-convert \
-            -w 72 -h 72 \
+          rsvg-convert -w 72 -h 72 \
             /tmp/nexora-icon.svg \
             -o app/src/main/res/mipmap-hdpi/ic_launcher.png
 
-          rsvg-convert \
-            -w 96 -h 96 \
+          rsvg-convert -w 96 -h 96 \
             /tmp/nexora-icon.svg \
             -o app/src/main/res/mipmap-xhdpi/ic_launcher.png
 
-          rsvg-convert \
-            -w 144 -h 144 \
+          rsvg-convert -w 144 -h 144 \
             /tmp/nexora-icon.svg \
             -o app/src/main/res/mipmap-xxhdpi/ic_launcher.png
 
-          rsvg-convert \
-            -w 192 -h 192 \
+          rsvg-convert -w 192 -h 192 \
             /tmp/nexora-icon.svg \
             -o app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
 
-          echo "Android launcher icons generated."
+          echo "Launcher icons generated."
 
-      # 9. Make Gradle wrapper executable
-      - name: Configure Gradle
+      # ==========================================
+      # 10. BUILD DEBUG APK
+      # ==========================================
+      - name: Build Nexora Studio APK
         run: |
-          chmod +x ./gradlew
+          gradle --no-daemon --stacktrace assembleDebug
 
-      # 10. Build debug APK
-      - name: Build APK
-        run: |
-          ./gradlew --no-daemon assembleDebug
-
-      # 11. Verify APK output
+      # ==========================================
+      # 11. VERIFY APK
+      # ==========================================
       - name: Verify APK
         run: |
-          APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
+          set -euo pipefail
 
-          if [ ! -f "$APK_PATH" ]; then
-            echo "ERROR: APK was not generated."
-            echo "Checking available APK files:"
-            find . -type f -name "*.apk"
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+
+          if [ ! -f "$APK" ]; then
+            echo "::error::APK was not generated."
+            find app/build/outputs -type f 2>/dev/null || true
             exit 1
           fi
 
-          echo "APK generated successfully:"
-          ls -lh "$APK_PATH"
+          echo "APK successfully generated."
+          ls -lh "$APK"
 
-      # 12. Upload APK for download
-      - name: Upload APK
+      # ==========================================
+      # 12. UPLOAD APK
+      # ==========================================
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: Nexora-Studio-APK
